@@ -114,7 +114,7 @@ public class KarafBoot implements IPentahoSystemListener {
         }
       }
 
-      String root = karafDir.toURI().getPath();
+      String root = karafDir.getAbsolutePath();
 
       // See if user specified a karaf folder they would like to use
       String rootCopyFolderString = System.getProperty( PENTAHO_KARAF_ROOT_COPY_DEST_FOLDER );
