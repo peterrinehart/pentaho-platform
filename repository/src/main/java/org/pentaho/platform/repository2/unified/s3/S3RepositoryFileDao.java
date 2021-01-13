@@ -54,6 +54,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -119,32 +120,6 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
     return out.toByteArray();
   }
 
-//  public RepositoryFile createFile( Serializable parentFolderId, RepositoryFile file, IRepositoryFileData data,
-//      RepositoryFileAcl acl, String versionMessage ) {
-//    String fileNameWithPath = RepositoryFilenameUtils.concat( parentFolderId.toString(), file.getName() );
-//    FileOutputStream fos = null;
-//    File f = new File( fileNameWithPath );
-//
-//    try {
-//      f.createNewFile();
-//      fos = new FileOutputStream( f );
-//      if ( data instanceof SimpleRepositoryFileData ) {
-//        fos.write( inputStreamToBytes( ( (SimpleRepositoryFileData) data ).getInputStream() ) );
-//      } else if ( data instanceof NodeRepositoryFileData ) {
-//        fos.write( inputStreamToBytes( new ByteArrayInputStream( ( (NodeRepositoryFileData) data ).getNode().toString()
-//            .getBytes() ) ) );
-//      }
-//    } catch ( FileNotFoundException e ) {
-//      throw new UnifiedRepositoryException( "Error writing file [" + fileNameWithPath + "]", e );
-//    } catch ( IOException e ) {
-//      throw new UnifiedRepositoryException( "Error writing file [" + fileNameWithPath + "]", e );
-//    } finally {
-//      IOUtils.closeQuietly( fos );
-//    }
-//
-//    return internalGetFile( f );
-//  }
-
   public RepositoryFile createFile( Serializable parentFolderId, RepositoryFile file, IRepositoryFileData data,
                                     RepositoryFileAcl acl, String versionMessage ) {
     String fileNameWithPath = RepositoryFilenameUtils.concat( parentFolderId.toString(), file.getName() );
@@ -179,14 +154,6 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
     }
     final RepositoryFile repositoryFolder = internalGetFile( newFolder );
     return repositoryFolder;
-    //      String folderNameWithPath = parentFolderId + "/" + file.getName();
-//      File newFolder = new File( folderNameWithPath );
-//      newFolder.mkdir();
-//      final RepositoryFile repositoryFolder = internalGetFile( newFolder );
-//      return repositoryFolder;
-//    } catch ( Throwable th ) {
-//      throw new UnifiedRepositoryException();
-//    }
   }
 
   public void deleteFile( Serializable fileId, String versionMessage ) {
@@ -278,7 +245,7 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
         new RepositoryFile.Builder( f.getURL().toString(), name )
           .folder( f.getType().equals( FileType.FOLDER ) || f.getType().equals( FileType.IMAGINARY ) ).versioned( false ).path(
           path ).versionId( f.getName().getBaseName() ).locked( false ).lockDate( null ).lockMessage( null )
-          .lockOwner( null ).title( name ).description( name ).locale( null ).fileSize( 1 )
+          .lockOwner( null ).title( name ).description( name ).locale( null ).fileSize( 1 ).lastModificationDate( new Date() )
           .build();
     } catch ( FileSystemException e ) {
       throw new UnifiedRepositoryException( e );
