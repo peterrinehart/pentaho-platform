@@ -279,11 +279,13 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
     RepositoryFile file = null;
 
     try {
+      String name = f.getName().getBaseName().equals( "rinehart_hackathon" ) ? "/" : f.getName().getBaseName();
+      String path = f.getURL().getPath().replace( "///ackbar-development/rinehart_hackathon", "/" );
       file =
-        new RepositoryFile.Builder( f.getPublicURIString(), f.getName().getBaseName() )
+        new RepositoryFile.Builder( f.getPublicURIString(), name )
           .folder( f.getType().equals( FileType.FOLDER ) || f.getType().equals( FileType.IMAGINARY ) ).versioned( false ).path(
-          f.getURL().getPath() ).versionId( f.getName().getBaseName() ).locked( false ).lockDate( null ).lockMessage( null )
-          .lockOwner( null ).title( f.getName().getBaseName() ).description( f.getName().getBaseName() ).locale( null ).fileSize( 1 )
+          path ).versionId( f.getName().getBaseName() ).locked( false ).lockDate( null ).lockMessage( null )
+          .lockOwner( null ).title( name ).description( name ).locale( null ).fileSize( 1 )
           .build();
     } catch ( FileSystemException e ) {
       throw new UnifiedRepositoryException( e );
@@ -353,7 +355,12 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
   @Override
   public RepositoryFileTree getTree( RepositoryRequest repositoryRequest ) {
 
-    File root = new File( getPhysicalFileLocation( repositoryRequest.getPath() ) );
+    FileObject root = null;
+    try {
+      root = KettleVFS.getFileObject( getPhysicalFileLocation( repositoryRequest.getPath() ) );
+    } catch ( KettleFileException e ) {
+      throw new UnifiedRepositoryException( e );
+    }
 
     //TODO ACL     
     return getTree( root, repositoryRequest.getDepth().intValue(),
@@ -363,49 +370,72 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
   @Deprecated
   public RepositoryFileTree getTree( String relPath, int depth, String filter, boolean showHidden ) {
 
-    File root = new File( getPhysicalFileLocation( relPath ) );
+    FileObject root = null;
+    try {
+      root = KettleVFS.getFileObject( getPhysicalFileLocation( relPath ) );
+    } catch ( KettleFileException e ) {
+      throw new UnifiedRepositoryException( e );
+    }
 
     //TODO ACL     
     return getTree( root, depth, filter, RepositoryRequest.FILES_TYPE_FILTER.FILES_FOLDERS );
   }
 
-  private RepositoryFileTree getTree( final File file, final int depth, final String childNodeFilter,
+  private RepositoryFileTree getTree( final FileObject file, final int depth, final String childNodeFilter,
       RepositoryRequest.FILES_TYPE_FILTER types ) {
-//
-//    RepositoryFile rootFile = internalGetFile( file );
-//
-//    List<RepositoryFileTree> children;
-//
-//    if ( depth != 0 ) {
-//      children = new ArrayList<RepositoryFileTree>();
-//
-//      if ( file.isDirectory() ) {
-//
-//        File[] childrenArray = file.listFiles();
-//
-//        for ( File child : childrenArray ) {
-//
-//          if ( child.isFile() ) {
-//
-//            if ( types == RepositoryRequest.FILES_TYPE_FILTER.FILES_FOLDERS || types == RepositoryRequest.FILES_TYPE_FILTER.FILES ) {
-//              children.add( new RepositoryFileTree( internalGetFile( child ), new ArrayList<>() ) );
-//            }
-//
-//            continue;
-//          }
-//
-//          RepositoryFileTree repositoryChildFileTree = getTree( child, depth - 1, childNodeFilter, types );
-//          if ( repositoryChildFileTree != null ) {
-//            children.add( repositoryChildFileTree );
-//          }
-//        }
-//      }
-//      Collections.sort( children );
-//    } else {
-//      children = null;
-//    }
-//    return new RepositoryFileTree( rootFile, children );
-    throw new UnsupportedOperationException( "This operation is not support by this repository" );
+
+    RepositoryFile rootFile = internalGetFile( file );
+
+    List<RepositoryFileTree> children;
+
+    if ( depth != 0 ) {
+      children = new ArrayList<>();
+
+      FileType type = null;
+      try {
+        type = file.getType();
+      } catch ( FileSystemException e ) {
+        throw new UnifiedRepositoryException( e );
+      }
+      if ( FileType.FOLDER.equals( type ) || FileType.IMAGINARY.equals( type ) ) {
+
+        FileObject[] childrenArray = null;
+
+        try {
+          childrenArray = file.getChildren();
+        } catch ( FileSystemException e ) {
+          throw new UnifiedRepositoryException(e);
+        }
+
+        for ( FileObject child : childrenArray ) {
+
+          FileType childType = null;
+          try {
+            childType = child.getType();
+          } catch ( FileSystemException e ) {
+            throw new UnifiedRepositoryException(e);
+          }
+
+          if ( FileType.FILE.equals( childType ) ) {
+
+            if ( types == RepositoryRequest.FILES_TYPE_FILTER.FILES_FOLDERS || types == RepositoryRequest.FILES_TYPE_FILTER.FILES ) {
+              children.add( new RepositoryFileTree( internalGetFile( child ), new ArrayList<>() ) );
+            }
+
+            continue;
+          }
+
+          RepositoryFileTree repositoryChildFileTree = getTree( child, depth - 1, childNodeFilter, types );
+          if ( repositoryChildFileTree != null ) {
+            children.add( repositoryChildFileTree );
+          }
+        }
+      }
+      Collections.sort( children );
+    } else {
+      children = null;
+    }
+    return new RepositoryFileTree( rootFile, children );
   }
 
   public List<VersionSummary> getVersionSummaries( Serializable fileId ) {
@@ -449,25 +479,26 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
   }
 
   public RepositoryFile updateFile( RepositoryFile file, IRepositoryFileData data, String versionMessage ) {
-    File f = new File( file.getId().toString() );
-    FileOutputStream fos = null;
-    try {
-      fos = new FileOutputStream( f, false );
-      if ( data instanceof SimpleRepositoryFileData ) {
-        fos.write( inputStreamToBytes( ( (SimpleRepositoryFileData) data ).getInputStream() ) );
-      } else if ( data instanceof NodeRepositoryFileData ) {
-        fos.write( inputStreamToBytes( new ByteArrayInputStream( ( (NodeRepositoryFileData) data ).getNode().toString()
-            .getBytes() ) ) );
-      }
-    } catch ( FileNotFoundException e ) {
-      throw new UnifiedRepositoryException( e );
-    } catch ( IOException e ) {
-      throw new UnifiedRepositoryException( e );
-    } finally {
-      IOUtils.closeQuietly( fos );
-    }
-
-    return getFile( file.getPath() );
+    throw new UnsupportedOperationException( "This operation is not support by this repository" );
+//    File f = new File( file.getId().toString() );
+//    FileOutputStream fos = null;
+//    try {
+//      fos = new FileOutputStream( f, false );
+//      if ( data instanceof SimpleRepositoryFileData ) {
+//        fos.write( inputStreamToBytes( ( (SimpleRepositoryFileData) data ).getInputStream() ) );
+//      } else if ( data instanceof NodeRepositoryFileData ) {
+//        fos.write( inputStreamToBytes( new ByteArrayInputStream( ( (NodeRepositoryFileData) data ).getNode().toString()
+//            .getBytes() ) ) );
+//      }
+//    } catch ( FileNotFoundException e ) {
+//      throw new UnifiedRepositoryException( e );
+//    } catch ( IOException e ) {
+//      throw new UnifiedRepositoryException( e );
+//    } finally {
+//      IOUtils.closeQuietly( fos );
+//    }
+//
+//    return getFile( file.getPath() );
   }
 
   public List<RepositoryFile> getReferrers( Serializable fileId ) {
@@ -623,10 +654,10 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
     }
 
     String physicalFileLocation = relPath;
-    if ( relPath.startsWith( "s3a://ackbar-testing/rinehart_hackathon" ) ) {
+    if ( relPath.startsWith( "s3a://ackbar-development/rinehart_hackathon" ) ) {
       physicalFileLocation = relPath;
     } else {
-      physicalFileLocation = RepositoryFilenameUtils.concat( "s3a://ackbar-testing/rinehart_hackathon", relPath.substring( RepositoryFilenameUtils.getPrefixLength( relPath ) ) );
+      physicalFileLocation = RepositoryFilenameUtils.concat( "s3a://ackbar-development/rinehart_hackathon", relPath.substring( RepositoryFilenameUtils.getPrefixLength( relPath ) ) );
     }
 
     return physicalFileLocation;
