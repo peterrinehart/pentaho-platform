@@ -47,7 +47,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -68,8 +67,10 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
   private static List<Character> reservedCharsWindows =
     Collections.unmodifiableList( Arrays.asList( new Character[]{ '?', '*', ':', '<', '>', '|'} ) );
   private boolean IS_WINDOWS;
+  private String rootDirString;
 
   public S3RepositoryFileDao() {
+    rootDirString = "s3a://ackbar-development/rinehart_hackathon";
     try {
       rootDir = KettleVFS.getFileObject( "s3a://ackbar-development/rinehart_hackathon" );
     } catch ( KettleFileException e ) {
@@ -78,6 +79,7 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
   }
 
   public S3RepositoryFileDao( final String baseDir ) {
+    rootDirString = "s3a://ackbar-development/rinehart_hackathon" + baseDir;
     try {
       rootDir = KettleVFS.getFileObject( baseDir );
     } catch ( KettleFileException e ) {
@@ -149,8 +151,8 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
     OutputStream fout = null;
     FileObject f = null;
     try {
-      fout = KettleVFS.getOutputStream( fileNameWithPath, false );
-      f = KettleVFS.getFileObject( fileNameWithPath );
+      f = KettleVFS.getFileObject( getPhysicalFileLocation( fileNameWithPath ) );
+      fout = KettleVFS.getOutputStream( getPhysicalFileLocation( fileNameWithPath ), false );
       if ( data instanceof SimpleRepositoryFileData ) {
         fout.write( inputStreamToBytes( ( (SimpleRepositoryFileData) data ).getInputStream() ) );
       } else if ( data instanceof NodeRepositoryFileData ) {
@@ -168,9 +170,16 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
 
   public RepositoryFile createFolder( Serializable parentFolderId, RepositoryFile file, RepositoryFileAcl acl,
       String versionMessage ) {
-    throw new UnsupportedOperationException( "This operation is not support by this repository" );
-//    try {
-//      String folderNameWithPath = parentFolderId + "/" + file.getName();
+    String folderNameWithPath = parentFolderId + "/" + file.getName();
+    FileObject newFolder = null;
+    try {
+      newFolder = KettleVFS.getFileObject( getPhysicalFileLocation( folderNameWithPath ) );
+    } catch ( KettleFileException e ) {
+      throw new UnifiedRepositoryException(e);
+    }
+    final RepositoryFile repositoryFolder = internalGetFile( newFolder );
+    return repositoryFolder;
+    //      String folderNameWithPath = parentFolderId + "/" + file.getName();
 //      File newFolder = new File( folderNameWithPath );
 //      newFolder.mkdir();
 //      final RepositoryFile repositoryFolder = internalGetFile( newFolder );
@@ -230,16 +239,21 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
 
   @SuppressWarnings( "unchecked" )
   public <T extends IRepositoryFileData> T getData( Serializable fileId, Serializable versionId, Class<T> dataClass ) {
-    File f = new File( fileId.toString() );
+    FileObject f = null;
+    try {
+      f = KettleVFS.getFileObject( fileId.toString() );
+    } catch ( KettleFileException e ) {
+      throw new UnifiedRepositoryException(e);
+    }
     T data = null;
     try {
       if ( SimpleRepositoryFileData.class.getName().equals( dataClass.getName() ) ) {
-        data = (T) new SimpleRepositoryFileData( new FileInputStream( f ), "UTF-8", "text/plain" );
+        data = (T) new SimpleRepositoryFileData( KettleVFS.getInputStream( fileId.toString() ), "UTF-8", "text/plain" );
       } else if ( NodeRepositoryFileData.class.getName().equals( dataClass.getName() ) ) {
         throw new UnsupportedOperationException( "This operation is not support by this repository" );
       }
 
-    } catch ( FileNotFoundException e ) {
+    } catch ( KettleFileException e ) {
       throw new UnifiedRepositoryException( e );
     }
     return data;
@@ -253,36 +267,15 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
     throw new UnsupportedOperationException( "This operation is not support by this repository" );
   }
 
-//  public RepositoryFile internalGetFile( File f ) {
-//
-//    RepositoryFile file = null;
-//    if ( f.exists() ) {
-//      String jcrPath = f.getAbsolutePath().substring( rootDir.getAbsolutePath().length() );
-//      if ( jcrPath.length() == 0 ) {
-//        jcrPath = "/";
-//      } else if ( IS_WINDOWS ) {
-//        jcrPath = FilenameUtils.separatorsToUnix( jcrPath );
-//      }
-//
-//      file =
-//          new RepositoryFile.Builder( f.getAbsolutePath(), f.getName() ).createdDate( new Date( f.lastModified() ) )
-//              .lastModificationDate( new Date( f.lastModified() ) ).folder( f.isDirectory() ).versioned( false ).path(
-//                  jcrPath ).versionId( f.getName() ).locked( false ).lockDate( null ).lockMessage( null ).lockOwner(
-//                  null ).title( f.getName() ).description( f.getName() ).locale( null ).fileSize( f.length() ).build();
-//    }
-//    return file;
-//
-//  }
-
   public RepositoryFile internalGetFile( FileObject f ) {
 
     RepositoryFile file = null;
 
     try {
       String name = f.getName().getBaseName().equals( "rinehart_hackathon" ) ? "/" : f.getName().getBaseName();
-      String path = f.getURL().getPath().replace( "///ackbar-development/rinehart_hackathon", "/" );
+      String path = f.getURL().getPath();//.replace( "///ackbar-development/rinehart_hackathon/", "/" );
       file =
-        new RepositoryFile.Builder( f.getPublicURIString(), name )
+        new RepositoryFile.Builder( f.getURL().toString(), name )
           .folder( f.getType().equals( FileType.FOLDER ) || f.getType().equals( FileType.IMAGINARY ) ).versioned( false ).path(
           path ).versionId( f.getName().getBaseName() ).locked( false ).lockDate( null ).lockMessage( null )
           .lockOwner( null ).title( name ).description( name ).locale( null ).fileSize( 1 )
@@ -654,10 +647,14 @@ public class S3RepositoryFileDao implements IRepositoryFileDao {
     }
 
     String physicalFileLocation = relPath;
-    if ( relPath.startsWith( "s3a://ackbar-development/rinehart_hackathon" ) ) {
+    if ( relPath.startsWith( rootDirString ) || relPath.startsWith( "s3a:///ackbar-development/rinehart_hackathon" ) ) {
       physicalFileLocation = relPath;
+    } else if ( relPath.startsWith( "///ackbar-development/rinehart_hackathon" ) ) {
+      physicalFileLocation = rootDirString + relPath.substring( 40 );
+    } else if ( relPath.equals( "/AMQPProducer2" ) ) {
+      physicalFileLocation = rootDirString + "/home/admin/AMQPProducer2.ktr";
     } else {
-      physicalFileLocation = RepositoryFilenameUtils.concat( "s3a://ackbar-development/rinehart_hackathon", relPath.substring( RepositoryFilenameUtils.getPrefixLength( relPath ) ) );
+      physicalFileLocation = RepositoryFilenameUtils.concat( rootDirString, relPath.substring( RepositoryFilenameUtils.getPrefixLength( relPath ) ) );
     }
 
     return physicalFileLocation;
