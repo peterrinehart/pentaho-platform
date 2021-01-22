@@ -27,7 +27,7 @@ import org.dom4j.Element;
 import org.pentaho.platform.api.util.XmlParseException;
 import org.pentaho.platform.config.messages.Messages;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.File;
 import java.io.IOException;

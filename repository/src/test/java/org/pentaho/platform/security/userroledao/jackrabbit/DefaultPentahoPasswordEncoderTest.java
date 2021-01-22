@@ -48,7 +48,7 @@ public class DefaultPentahoPasswordEncoderTest {
   public void testValidCredentials( ) {
     DefaultPentahoPasswordEncoder passwordEncoder = new DefaultPentahoPasswordEncoder();
     String password = "helloworld";
-    String encryptedPassword =  new UserRoleWebServiceBase.PasswordEncoderMock().encodePassword( password, null );
+    String encryptedPassword =  new UserRoleWebServiceBase.PasswordEncoderMock().encode( password );
     Assert.assertTrue( passwordEncoder.isPasswordValid( encryptedPassword, password, null ) );
   }
 
