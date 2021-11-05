@@ -20,8 +20,7 @@
 
 package org.pentaho.platform.web.http.api.resources;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 import java.io.*;
@@ -82,8 +81,8 @@ public class RepositoryImportResourceTest {
     policy = mock( IAuthorizationPolicy.class );
     ITenant tenat = mock( ITenant.class );
     resolver = mock( ITenantedPrincipleNameResolver.class );
-    doReturn( tenat ).when( resolver ).getTenant( anyString() );
-    doReturn( REAL_USER ).when( resolver ).getPrincipleName( anyString() );
+    doReturn( tenat ).when( resolver ).getTenant( nullable( String.class ) );
+    doReturn( REAL_USER ).when( resolver ).getPrincipleName( nullable( String.class ) );
     policy = mock( IAuthorizationPolicy.class );
     pentahoObjectFactory = mock( IPentahoObjectFactory.class );
     iPlatformMimeResolver = mock( NameBaseMimeResolver.class );
@@ -120,8 +119,8 @@ public class RepositoryImportResourceTest {
           }
         } ).when( handler ).getImportSession();
 
-    when( pentahoObjectFactory.objectDefined( anyString() ) ).thenReturn( true );
-    when( pentahoObjectFactory.get( this.anyClass(), anyString(), any( IPentahoSession.class ) ) ).thenAnswer(
+    when( pentahoObjectFactory.objectDefined( nullable( String.class ) ) ).thenReturn( true );
+    when( pentahoObjectFactory.get( this.anyClass(), nullable( String.class ), any( IPentahoSession.class ) ) ).thenAnswer(
         new Answer<Object>() {
           @Override
           public Object answer( InvocationOnMock invocation ) throws Throwable {
@@ -157,7 +156,7 @@ public class RepositoryImportResourceTest {
     RepositoryImportResource importResource = new RepositoryImportResource();
     InputStream mockInputStream = mock( InputStream.class );
     FormDataContentDisposition formDataContentDisposition =  mock( FormDataContentDisposition.class );
-    when( policy.isAllowed( anyString() ) ).thenAnswer( new Answer<Boolean>() {
+    when( policy.isAllowed( nullable( String.class ) ) ).thenAnswer( new Answer<Boolean>() {
       @Override
       public Boolean answer( InvocationOnMock invocation ) throws Throwable {
         return true;
@@ -169,9 +168,9 @@ public class RepositoryImportResourceTest {
   private Class<?> anyClass() {
     return argThat( new AnyClassMatcher() );
   }
-  private class AnyClassMatcher extends ArgumentMatcher<Class<?>> {
+  private class AnyClassMatcher implements ArgumentMatcher<Class<?>> {
     @Override
-    public boolean matches( final Object arg ) {
+    public boolean matches( final Class<?> arg ) {
       return true;
     }
   }

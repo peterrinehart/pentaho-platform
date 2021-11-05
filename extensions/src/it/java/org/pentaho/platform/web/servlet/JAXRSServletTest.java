@@ -10,7 +10,7 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
  *
- * Copyright 2006 - 2019 Hitachi Vantara.  All rights reserved.
+ * Copyright 2006 - 2021 Hitachi Vantara.  All rights reserved.
  *
  */
 
@@ -30,6 +30,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -56,6 +57,7 @@ import static org.mockito.Mockito.*;
  * Created by Dmitriy Stepanov on 28.03.18.
  */
 @RunWith( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 @PrepareForTest( { SpringServlet.class, ServletContainer.class, JAXRSServlet.class } )
 public class JAXRSServletTest {
 

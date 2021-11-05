@@ -24,7 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 import org.pentaho.di.core.util.Assert;
@@ -67,10 +67,10 @@ public class AuthorizationActionResourceTest {
     when( service.getActionList() ).thenReturn( Arrays.asList( new IAuthorizationAction[] { readAction } ) );
     when( service.getPolicy() ).thenReturn( policy );
 
-    when( service.validateAuth( anyString() ) ).thenCallRealMethod();
+    when( service.validateAuth( nullable( String.class ) ) ).thenCallRealMethod();
 
     when( resource.getAuthorizationActionService() ).thenReturn( service );
-    when( resource.validateAuth( anyString() ) ).thenCallRealMethod();
+    when( resource.validateAuth( nullable( String.class ) ) ).thenCallRealMethod();
   }
 
   @Test

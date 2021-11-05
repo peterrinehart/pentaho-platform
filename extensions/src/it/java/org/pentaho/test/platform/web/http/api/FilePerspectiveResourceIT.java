@@ -161,7 +161,7 @@ public class FilePerspectiveResourceIT extends JerseyTest {
 
     verify( repo ).createFile( eq( publicFolderId ),
         argThat( isLikeFile( new RepositoryFile.Builder( fileName ).build() ) ),
-        argThat( hasData( text.getBytes(), "application/octet-stream" ) ), anyString() );
+        argThat( hasData( text.getBytes(), "application/octet-stream" ) ), nullable( String.class ) );
   }*/
 
   public static class JUnitContentGeneratorPluginProvider implements IPluginProvider {

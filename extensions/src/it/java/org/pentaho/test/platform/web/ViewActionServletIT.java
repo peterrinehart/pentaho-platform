@@ -48,7 +48,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -128,7 +128,7 @@ public class ViewActionServletIT {
 
     verify( backgroundExecution ).backgroundExecuteAction( eq( PentahoSessionHolder.getSession() ),
       any( IParameterProvider.class ) );
-    verify( printWriter, atLeast( 1 ) ).print( anyString() );
+    verify( printWriter, atLeast( 1 ) ).print( nullable( String.class ) );
     verify( response ).setHeader( eq( "background_execution" ), eq( "true" ) );
   }
 

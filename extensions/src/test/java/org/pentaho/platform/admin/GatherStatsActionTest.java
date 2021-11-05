@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.platform.api.engine.IApplicationContext;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
@@ -51,10 +51,6 @@ public class GatherStatsActionTest {
 
   @Test( expected = KettleXMLException.class )
   public void testExecute_nullJobFilePath() throws Exception {
-
-    GatherStatsAction spyStatsAction = spy( gatherStatsAction );
-    doReturn( null ).when( spyStatsAction ).getJobFileFullPath();
-
     gatherStatsAction.execute();
   }
 

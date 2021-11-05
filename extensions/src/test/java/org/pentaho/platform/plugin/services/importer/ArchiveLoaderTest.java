@@ -32,6 +32,7 @@ import org.pentaho.platform.api.repository2.unified.IPlatformImportBundle;
 import org.pentaho.platform.plugin.services.importexport.IRepositoryImportLogger;
 import org.pentaho.platform.plugin.services.importexport.ImportSession;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -54,6 +55,7 @@ import static org.pentaho.platform.plugin.services.importer.ArchiveLoader.ZIPS_F
  * Created with IntelliJ IDEA. User: kwalker Date: 6/20/13 Time: 12:37 PM
  */
 @RunWith(PowerMockRunner.class)
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 @PrepareForTest(ImportSession.class)
 public class ArchiveLoaderTest {
 
@@ -151,38 +153,25 @@ public class ArchiveLoaderTest {
   private ArchiveLoader createArchiveLoader( final IPlatformImporter importer, final FileInputStream inputStream ) {
     return new ArchiveLoader( importer, LOAD_STAMP ) {
       @Override
-      FileInputStream createInputStream( File file ) throws FileNotFoundException {
+      FileInputStream createInputStream( File file ) {
         return inputStream;
       }
     };
   }
 
   private ArgumentMatcher<IPlatformImportBundle> bundleMatcher( final String filename, final InputStream inputStream ) {
-    return new ArgumentMatcher<IPlatformImportBundle>() {
-      @Override
-      public boolean matches( Object argument ) {
-        RepositoryFileImportBundle bundle = (RepositoryFileImportBundle) argument;
-        try {
-          return bundle.getName().equals( filename ) && bundle.getAcl() == null
-              && bundle.getInputStream().equals( inputStream ) && bundle.overwriteInRepository() && bundle.isHidden();
-        } catch ( IOException e ) {
-          return false;
-        }
+    return argument -> {
+      RepositoryFileImportBundle bundle = (RepositoryFileImportBundle) argument;
+      try {
+        return bundle.getName().equals( filename ) && bundle.getAcl() == null
+            && bundle.getInputStream().equals( inputStream ) && bundle.overwriteInRepository() && bundle.isHidden();
+      } catch ( IOException e ) {
+        return false;
       }
     };
   }
 
-  private Matcher<File> fileMatcher( final File origFile ) {
-    return new BaseMatcher<File>() {
-      @Override
-      public boolean matches( final Object item ) {
-        return ( (File) item ).getName().equals( origFile.getName() + TIMESTAMP );
-      }
-
-      @Override
-      public void describeTo( final Description description ) {
-
-      }
-    };
+  private ArgumentMatcher<File> fileMatcher( final File origFile ) {
+    return item -> ( item ).getName().equals( origFile.getName() + TIMESTAMP );
   }
 }

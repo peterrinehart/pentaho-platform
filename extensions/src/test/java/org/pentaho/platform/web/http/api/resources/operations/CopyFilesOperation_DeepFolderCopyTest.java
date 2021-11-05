@@ -76,7 +76,7 @@ public class CopyFilesOperation_DeepFolderCopyTest {
 
     doReturn( mockFolder() ).when( repo )
       .createFolder( any( Serializable.class ), any( RepositoryFile.class ), any(
-        RepositoryFileAcl.class ), anyString() );
+        RepositoryFileAcl.class ), nullable( String.class ) );
 
     doCallRealMethod().when( operation ).performFolderDeepCopy( any( RepositoryFile.class ),
       any( RepositoryFile.class ), anyInt() );
@@ -166,10 +166,10 @@ public class CopyFilesOperation_DeepFolderCopyTest {
 
     verify( repo, times( newFolders ) )
       .createFolder( any( Serializable.class ), any( RepositoryFile.class ), any( RepositoryFileAcl.class ),
-        anyString() );
+        nullable( String.class ) );
 
     verify( repo, times( newFiles ) ).createFile( any( RepositoryFile.class ), any( RepositoryFile.class ), any(
-      IRepositoryFileData.class ), anyString() );
+      IRepositoryFileData.class ), nullable( String.class ) );
   }
 
   /**

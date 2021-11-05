@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.security.IAuthenticationRoleMapper;
 import org.pentaho.platform.api.mt.ITenant;
 import org.pentaho.platform.api.mt.ITenantedPrincipleNameResolver;
@@ -41,8 +41,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 /**
@@ -184,7 +184,7 @@ public class DefaultLdapUserRoleListServiceTest {
     assertEquals( roleNameUtils, service.getRoleNameUtils() );
     service.setUsernamesInRoleSearch( usersInRoleSearch );
 
-    when( roleNameUtils.getPrincipleName( anyString() ) ).thenReturn( "rock star" );
+    when( roleNameUtils.getPrincipleName( nullable( String.class ) ) ).thenReturn( "rock star" );
     when( roleMapper.fromPentahoRole( "rock star" ) ).thenReturn( "power user" );
     when( usersInRoleSearch.search( any( filterArgs.getClass() ) ) ).thenReturn( powerUsers );
 
@@ -192,7 +192,7 @@ public class DefaultLdapUserRoleListServiceTest {
 
     assertNotNull( foundUsers );
     assertEquals( 2, foundUsers.size() );
-    verify( usernameComparator ).compare( anyString(), anyString() );
+    verify( usernameComparator ).compare( nullable( String.class ), nullable( String.class ) );
   }
 
   @Test( expected = UnsupportedOperationException.class )
@@ -208,7 +208,7 @@ public class DefaultLdapUserRoleListServiceTest {
     service.setExtraRoles( extraRoles );
     assertEquals( userNameUtils, service.getUserNameUtils() );
     when( userDetailService.loadUserByUsername( "joe" ) ).thenReturn( userDetails );
-    when( userNameUtils.getPrincipleName( anyString() ) ).thenReturn( "joe" );
+    when( userNameUtils.getPrincipleName( nullable( String.class ) ) ).thenReturn( "joe" );
 
     auths.add( new SimpleGrantedAuthority( "test" ) );
 

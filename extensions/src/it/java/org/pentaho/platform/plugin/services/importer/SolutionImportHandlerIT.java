@@ -20,7 +20,7 @@
 
 package org.pentaho.platform.plugin.services.importer;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class SolutionImportHandlerIT extends Assert {
     mp.define( IUserRoleListService.class, StubUserRoleListService.class );
 
     IAuthorizationPolicy policy = mock( IAuthorizationPolicy.class );
-    when( policy.isAllowed( anyString() ) ).thenReturn( true );
+    when( policy.isAllowed( nullable( String.class ) ) ).thenReturn( true );
     mp.defineInstance( IAuthorizationPolicy.class, policy );
 
     mp.start();

@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.IApplicationContext;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.ISystemConfig;
@@ -65,7 +65,6 @@ public class DefaultContentSystemListenerTest {
   @Test
   public void testStartup() throws Exception {
     when( systemConfig.getProperty( "system.enable-async-default-content-loading" ) ).thenReturn( "false" );
-    when( appContext.getSolutionPath( "system/default-content" ) ).thenReturn( TestResourceLocation.TEST_RESOURCES + "/SystemConfig/system" );
 
     boolean startup = defaultContentSystemListener.startup( session );
     assertTrue( startup );

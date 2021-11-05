@@ -26,7 +26,7 @@ import org.pentaho.platform.api.repository.RepositoryException;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.pentaho.platform.plugin.services.importexport.legacy.MondrianCatalogRepositoryHelper.ETC_MONDRIAN_JCR_FOLDER;
@@ -40,7 +40,7 @@ public class MondrianCatalogRepositoryHelperTest {
   public void setUp() {
     repository = mock( IUnifiedRepository.class );
     RepositoryFile repositoryFile = mock( RepositoryFile.class );
-    when( repository.getFile( anyString() ) ).thenReturn( repositoryFile );
+    when( repository.getFile( nullable( String.class ) ) ).thenReturn( repositoryFile );
     mondrianCatalogRepositoryHelper = new MondrianCatalogRepositoryHelper( repository );
   }
 

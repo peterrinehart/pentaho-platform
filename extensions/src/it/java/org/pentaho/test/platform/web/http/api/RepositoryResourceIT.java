@@ -92,7 +92,7 @@ import java.util.List;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.pentaho.test.platform.web.http.api.JerseyTestUtil.assertResponse;
@@ -116,8 +116,8 @@ public class RepositoryResourceIT extends JerseyTest implements ApplicationConte
 
   public RepositoryResourceIT() throws Exception {
     IRepositoryVersionManager mockRepositoryVersionManager = mock( IRepositoryVersionManager.class );
-    when( mockRepositoryVersionManager.isVersioningEnabled( anyString() ) ).thenReturn( true );
-    when( mockRepositoryVersionManager.isVersionCommentEnabled( anyString() ) ).thenReturn( false );
+    when( mockRepositoryVersionManager.isVersioningEnabled( nullable( String.class ) ) ).thenReturn( true );
+    when( mockRepositoryVersionManager.isVersionCommentEnabled( nullable( String.class ) ) ).thenReturn( false );
     JcrRepositoryFileUtils.setRepositoryVersionManager( mockRepositoryVersionManager );
 
     repositoryBase = new DefaultUnifiedRepositoryBase() {

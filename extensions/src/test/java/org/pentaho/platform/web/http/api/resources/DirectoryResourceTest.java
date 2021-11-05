@@ -21,7 +21,7 @@
 package org.pentaho.platform.web.http.api.resources;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -83,7 +83,7 @@ public class DirectoryResourceTest {
     Response testResponse = directoryResource.createDirs( null );
 
     assertEquals( Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), testResponse.getStatus() );
-    verify( directoryResource.fileService, times( 0 ) ).doCreateDirSafe( anyString() );
+    verify( directoryResource.fileService, times( 0 ) ).doCreateDirSafe( nullable( String.class ) );
   }
 
   @Test
@@ -98,12 +98,12 @@ public class DirectoryResourceTest {
 
   @Test
   public void testCreateDirs_Forbidden() throws Exception {
-    doReturn( false ).when( directoryResource.fileService ).doCreateDirSafe( anyString() );
+    doReturn( false ).when( directoryResource.fileService ).doCreateDirSafe( nullable( String.class ) );
 
     Response testResponse = directoryResource.createDirs( ROOTLEVEL_PATH );
 
     assertEquals( Response.Status.FORBIDDEN.getStatusCode(), testResponse.getStatus() );
-    verify( directoryResource.fileService, times( 0 ) ).doCreateDirSafe( anyString() );
+    verify( directoryResource.fileService, times( 0 ) ).doCreateDirSafe( nullable( String.class ) );
   }
 
   @Test

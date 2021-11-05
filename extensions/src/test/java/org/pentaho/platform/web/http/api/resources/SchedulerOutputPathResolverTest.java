@@ -29,7 +29,7 @@ import org.pentaho.platform.api.usersettings.IUserSettingService;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 /**
@@ -79,7 +79,7 @@ public class SchedulerOutputPathResolverTest {
     scheduleRequest.setOutputFile( outputFolder );
 
     RepositoryFile repoFile = mock( RepositoryFile.class );
-    when( repo.getFile( anyString() ) ).thenReturn( repoFile );
+    when( repo.getFile( nullable( String.class ) ) ).thenReturn( repoFile );
     when( repoFile.isFolder() ).thenReturn( true );
 
     schedulerOutputPathResolver = new SchedulerOutputPathResolver( scheduleRequest );
@@ -98,7 +98,7 @@ public class SchedulerOutputPathResolverTest {
     scheduleRequest.setOutputFile( outputFolder );
 
     RepositoryFile repoFile = mock( RepositoryFile.class );
-    when( repo.getFile( anyString() ) ).thenReturn( repoFile );
+    when( repo.getFile( nullable( String.class ) ) ).thenReturn( repoFile );
     when( repoFile.isFolder() ).thenReturn( false );
 
     schedulerOutputPathResolver = spy( new SchedulerOutputPathResolver( scheduleRequest ) );
@@ -120,7 +120,7 @@ public class SchedulerOutputPathResolverTest {
     scheduleRequest.setOutputFile( outputFolder );
 
     RepositoryFile repoFile = mock( RepositoryFile.class );
-    when( repo.getFile( anyString() ) ).thenReturn( repoFile );
+    when( repo.getFile( nullable( String.class ) ) ).thenReturn( repoFile );
     when( repoFile.isFolder() ).thenReturn( false );
 
     schedulerOutputPathResolver = spy( new SchedulerOutputPathResolver( scheduleRequest ) );

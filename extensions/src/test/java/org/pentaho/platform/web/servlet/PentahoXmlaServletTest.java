@@ -51,14 +51,13 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(DriverManager.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore( { "javax.management.*", "jdk.internal.reflect.*" } )
 public class PentahoXmlaServletTest  {
 
   private static final String DATASOURCE_XML =
@@ -170,10 +169,10 @@ public class PentahoXmlaServletTest  {
     when( mondrianCatalog.getDataSourceInfo() ).thenReturn( "DataSource=foo" );
 
 
-    doReturn( mondrianCatalog ).when( catalogService ).getCatalog(  anyString(), anyObject() );
+    doReturn( mondrianCatalog ).when( catalogService ).getCatalog(  nullable( String.class ), any() );
     PowerMockito.mockStatic(DriverManager.class);
 
-    when(DriverManager.getConnection(anyString(), anyObject())).thenReturn( mock( RolapConnection.class ));
+    when(DriverManager.getConnection(nullable( String.class ), any())).thenReturn( mock( RolapConnection.class ));
 
 
     PentahoSystem.registerObject( catalogService );
@@ -198,7 +197,7 @@ public class PentahoXmlaServletTest  {
     }
 
     // We verify that only one Catalog Locator is created for multiple requests
-    verify( xmlaServlet, times(1) ).makeCatalogLocator( anyObject() );
+    verify( xmlaServlet, times(1) ).makeCatalogLocator( any() );
 
   }
 }

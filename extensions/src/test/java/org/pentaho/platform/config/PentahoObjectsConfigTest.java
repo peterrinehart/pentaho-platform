@@ -27,12 +27,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 /**
@@ -57,7 +57,6 @@ public class PentahoObjectsConfigTest {
     pentahoObjectsConfig = new PentahoObjectsConfig();
     poc = spy( pentahoObjectsConfig );
     poc.setDocument( document );
-    when( document.getName() ).thenReturn( "documentName" );
 
     when( document.addElement( "default:bean" ) ).thenReturn( beanElement );
 
@@ -65,8 +64,8 @@ public class PentahoObjectsConfigTest {
     scope = PentahoObjectsConfig.ScopeType.singleton;
 
     captor = ArgumentCaptor.forClass( PentahoObjectsConfig.ObjectDescriptor.class );
-    doNothing().when( poc ).updateObject( anyString(), any( PentahoObjectsConfig.ObjectDescriptor.class ) );
-    doReturn( className ).when( poc ).getObjectClassName( anyString() );
+    doNothing().when( poc ).updateObject( nullable( String.class ), any( PentahoObjectsConfig.ObjectDescriptor.class ) );
+    doReturn( className ).when( poc ).getObjectClassName( nullable( String.class ) );
   }
 
   private void verifySetter( String lookupId ) {
@@ -359,7 +358,7 @@ public class PentahoObjectsConfigTest {
 
   @Test
   public void testSetObject() throws Exception {
-    doReturn( null ).when( poc ).getObjectBeanElement( anyString() );
+    doReturn( null ).when( poc ).getObjectBeanElement( nullable( String.class ) );
     PentahoObjectsConfig.ObjectDescriptor descriptor = mock( PentahoObjectsConfig.ObjectDescriptor.class );
     when( descriptor.getScope() ).thenReturn( PentahoObjectsConfig.ScopeType.prototype );
     when( descriptor.getClassName() ).thenReturn( className );
@@ -374,10 +373,8 @@ public class PentahoObjectsConfigTest {
   @Test
   public void testUpdateObject_objectDoesNotExist() throws Exception {
     poc = spy( pentahoObjectsConfig );
-    doReturn( null ).when( poc ).getObjectBeanElement( anyString() );
+    doReturn( null ).when( poc ).getObjectBeanElement( nullable( String.class ) );
     PentahoObjectsConfig.ObjectDescriptor descriptor = mock( PentahoObjectsConfig.ObjectDescriptor.class );
-    when( descriptor.getScope() ).thenReturn( PentahoObjectsConfig.ScopeType.prototype );
-    when( descriptor.getClassName() ).thenReturn( className );
 
     doNothing().when( poc ).setObject( eq( "hello" ), eq( descriptor ) );
 
@@ -388,7 +385,7 @@ public class PentahoObjectsConfigTest {
   @Test
   public void testUpdateObject_objectDoesExist() throws Exception {
     poc = spy( pentahoObjectsConfig );
-    doReturn( beanElement ).when( poc ).getObjectBeanElement( anyString() );
+    doReturn( beanElement ).when( poc ).getObjectBeanElement( nullable( String.class ) );
     PentahoObjectsConfig.ObjectDescriptor descriptor = mock( PentahoObjectsConfig.ObjectDescriptor.class );
     when( descriptor.getScope() ).thenReturn( PentahoObjectsConfig.ScopeType.prototype );
     when( descriptor.getClassName() ).thenReturn( className );
@@ -415,7 +412,7 @@ public class PentahoObjectsConfigTest {
   public void testGetObject() throws Exception {
     pentahoObjectsConfig.setDocument( document );
     assertEquals( document, pentahoObjectsConfig.getDocument() );
-    when( this.document.selectSingleNode( anyString() ) ).thenReturn( beanElement );
+    when( this.document.selectSingleNode( nullable( String.class ) ) ).thenReturn( beanElement );
     when( beanElement.attributeValue( "class" ) ).thenReturn( "org.pentaho.TestClass" );
     when( beanElement.attributeValue( "scope" ) ).thenReturn( "singleton" );
 

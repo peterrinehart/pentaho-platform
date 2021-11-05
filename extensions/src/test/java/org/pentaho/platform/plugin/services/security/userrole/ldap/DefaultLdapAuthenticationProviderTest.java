@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.security.IAuthenticationRoleMapper;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.Authentication;
@@ -40,8 +40,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 /**
@@ -92,8 +92,8 @@ public class DefaultLdapAuthenticationProviderTest {
     ldapAuthProvider.setUserDetailsContextMapper( contextMapper );
     UserDetails userDetails = mock( UserDetails.class );
     when( userDetails.getAuthorities() ).thenReturn( grantedAuthorities );
-    when( contextMapper.mapUserFromContext( any( DirContextOperations.class ), anyString(), any( grantedAuthorities.getClass() ) ) ).thenReturn( userDetails );
-    when( roleMapper.toPentahoRole( anyString() ) ).thenReturn( "admin" );
+    when( contextMapper.mapUserFromContext( any( DirContextOperations.class ), nullable( String.class ), any( grantedAuthorities.getClass() ) ) ).thenReturn( userDetails );
+    when( roleMapper.toPentahoRole( nullable( String.class ) ) ).thenReturn( "admin" );
 
     Authentication result = ldapAuthProvider.authenticate( usernamePasswordAuthenticationToken );
 

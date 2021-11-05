@@ -20,10 +20,15 @@
 
 package org.pentaho.platform.engine.security;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -41,7 +46,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.AdditionalMatchers;
-import org.mockito.Matchers;
 import org.pentaho.platform.api.engine.IPentahoObjectFactory;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.ISystemSettings;
@@ -144,7 +148,7 @@ public class SecurityHelperTest {
     IPentahoObjectFactory pentahoObjectFactory = mock( IPentahoObjectFactory.class, PENTAHO_OBJECT_FACTORY_MOCK_NAME );
     when( pentahoObjectFactory.objectDefined( eq( SINGLE_TENANT_ADMIN_USER_NAME ) ) ).thenReturn( true );
     when( pentahoObjectFactory.get( eq( String.class ), eq( SINGLE_TENANT_ADMIN_USER_NAME ),
-        Matchers.<IPentahoSession>any() ) ).thenReturn( ADMIN_USER_NAME );
+      nullable( IPentahoSession.class ) ) ).thenReturn( ADMIN_USER_NAME );
     when( pentahoObjectFactory.getName() ).thenReturn( PENTAHO_OBJECT_FACTORY_MOCK_NAME );
     boot.setFactory( pentahoObjectFactory );
 
@@ -189,7 +193,7 @@ public class SecurityHelperTest {
 
     IUserRoleListService userRoleListService = getUserRoleListServiceMock( "admin", new String[]{"authenticated"} );
 
-    when( userRoleListService.getRolesForUser( Matchers.<ITenant>any(), eq( "suzy" ) ) )
+    when( userRoleListService.getRolesForUser( any(), eq( "suzy" ) ) )
       .thenReturn( Collections.singletonList( "authenticated" ) );
 
     PentahoSystem.registerObject( userRoleListService );
@@ -269,7 +273,7 @@ public class SecurityHelperTest {
 
     IUserRoleListService userRoleListService = getUserRoleListServiceMock( "admin", new String[]{"authenticated"} );
 
-    when( userRoleListService.getRolesForUser( Matchers.<ITenant>any(), eq( "suzy" ) ) ).thenReturn( Collections.singletonList( "authenticated" ) );
+    when( userRoleListService.getRolesForUser( any(), eq( "suzy" ) ) ).thenReturn( Collections.singletonList( "authenticated" ) );
 
     PentahoSystem.registerObject( userRoleListService );
     PentahoSystem.registerReference(
@@ -347,8 +351,8 @@ public class SecurityHelperTest {
     List<String> noRoles = new ArrayList<String>();
     List<String> allRoles = new ArrayList<String>( Arrays.asList( roles ) );
 
-    when( mockUserRoleListService.getRolesForUser( Matchers.<ITenant>any(), eq( userName ) ) ).thenReturn( allRoles );
-    when( mockUserRoleListService.getRolesForUser( Matchers.<ITenant>any(), AdditionalMatchers.not( eq( userName ) ) ) )
+    when( mockUserRoleListService.getRolesForUser( any(), eq( userName ) ) ).thenReturn( allRoles );
+    when( mockUserRoleListService.getRolesForUser( any(ITenant.class), AdditionalMatchers.not( eq( userName ) ) ) )
         .thenReturn( noRoles );
 
     return mockUserRoleListService;

@@ -23,13 +23,13 @@ package org.pentaho.platform.plugin.services.security.userrole.ldap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.mt.ITenantedPrincipleNameResolver;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.ldap.search.LdapUserSearch;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 /**
@@ -45,7 +45,7 @@ public class DefaultLdapUserDetailsServiceTest {
   @Test
   public void testLoadUserByUsername() throws Exception {
     DefaultLdapUserDetailsService service = spy( new DefaultLdapUserDetailsService( userSearch, authPop, usernameUtils ) );
-    when( usernameUtils.getPrincipleName( anyString() ) ).thenReturn( "admin" );
+    when( usernameUtils.getPrincipleName( nullable( String.class ) ) ).thenReturn( "admin" );
     try {
       service.loadUserByUsername( "JOE" );
     } catch ( NullPointerException npe ) {

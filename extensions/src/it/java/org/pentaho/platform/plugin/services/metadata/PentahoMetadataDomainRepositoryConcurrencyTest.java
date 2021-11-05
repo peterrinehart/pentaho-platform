@@ -159,7 +159,7 @@ public class PentahoMetadataDomainRepositoryConcurrencyTest {
         repository.setFileMetadata( domainId, generateMetadataFor( domainId ) );
         return null;
       }
-    } ).when( domainRepository ).createUniqueFile( anyString(), anyString(), any( SimpleRepositoryFileData.class ) );
+    } ).when( domainRepository ).createUniqueFile( nullable( String.class ), nullable( String.class ), any( SimpleRepositoryFileData.class ) );
 
     domainRepository.setXmiParser( mockXmiParser() );
 

@@ -21,7 +21,7 @@
 package org.pentaho.platform.plugin.services.importexport;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -117,7 +117,7 @@ public class ImportSessionTest {
     ExportManifestEntity entity = mock( ExportManifestEntity.class );
     RepositoryFileExtraMetaData repositoryFileExtraMetaData = mock( RepositoryFileExtraMetaData.class );
 
-    when( manifest.getExportManifestEntity( anyString() )).thenReturn( entity );
+    when( manifest.getExportManifestEntity( nullable( String.class ) )).thenReturn( entity );
     when( entity.getRepositoryFileExtraMetaData() ).thenReturn( repositoryFileExtraMetaData );
 
     Whitebox.setInternalState( importSession, "manifest", manifest );

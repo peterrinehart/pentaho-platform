@@ -66,7 +66,7 @@ public class UserSettingsResourceTest {
     when( userSettingsResource.getUserSettingService() ).thenCallRealMethod();
     PentahoSystem.registerObject( userSettingService );
 
-    when( userSettingsResource.setUserSetting( anyString(), anyString() ) ).thenCallRealMethod();
+    when( userSettingsResource.setUserSetting( nullable( String.class ), nullable( String.class ) ) ).thenCallRealMethod();
     Response response = userSettingsResource.setUserSetting( USER_SETTING_NAME,
       "[{\"fullPath\":\"/public/Steel Wheels/Top Customers (report).prpt\", \"title\":\"<script>if"
         + "(true&&'str'!='str2')alert(1)</script>\", \"lastUse\":0}]" );

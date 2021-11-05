@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 public class MetaStoreImportHandlerTest {
@@ -69,6 +69,6 @@ public class MetaStoreImportHandlerTest {
     // not going to test all of the internals of the MetaStoreUtil.copy, just enough to make sure it was called.
     verify( metastore ).createNamespace( "pentaho" );
     verify( metastore ).createNamespace( "hitachi" );
-    verify( fromMetaStore ).setRootFolder( anyString() );
+    verify( fromMetaStore ).setRootFolder( nullable( String.class ) );
   }
 }

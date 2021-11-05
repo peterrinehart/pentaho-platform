@@ -79,10 +79,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings( "nls" )
@@ -204,7 +204,7 @@ public class MondrianCatalogHelperIT {
       helperSpy.addCatalog( new ByteArrayInputStream( new byte[0] ), cat, true, null, session );
     } catch ( MondrianException e ) {
       // verifying the repository rolled back and the cache reinitialized
-      verify( repositoryHelper, times( 1 ) ).deleteHostedCatalog( anyString() );
+      verify( repositoryHelper, times( 1 ) ).deleteHostedCatalog( nullable( String.class ) );
       verify( helperSpy, times( 2 ) ).reInit( any( IPentahoSession.class ) );
     }
     helperSpy.addCatalog( new ByteArrayInputStream( new byte[0] ), cat, true, null, session );
@@ -244,12 +244,12 @@ public class MondrianCatalogHelperIT {
         eq( UnifiedRepositoryTestUtils.makeIdObject( steelWheelsFolderPath ) ),
         argThat( UnifiedRepositoryTestUtils.isLikeFile( UnifiedRepositoryTestUtils.makeFileObject( metadataPath ) ) ),
         argThat( UnifiedRepositoryTestUtils.hasData( UnifiedRepositoryTestUtils.pathPropertyPair( "/catalog/definition", "mondrian:/" + cat.getName() ), UnifiedRepositoryTestUtils.pathPropertyPair(
-            "/catalog/datasourceInfo", cat.getDataSourceInfo() ) ) ), anyString()
+            "/catalog/datasourceInfo", cat.getDataSourceInfo() ) ) ), nullable( String.class )
     );
 
     verify( repo ).createFile( eq( UnifiedRepositoryTestUtils.makeIdObject( steelWheelsFolderPath ) ),
         argThat( UnifiedRepositoryTestUtils.isLikeFile( UnifiedRepositoryTestUtils.makeFileObject( steelWheelsFolderPath + RepositoryFile.SEPARATOR + "schema.xml" ) ) ),
-        any( IRepositoryFileData.class ), anyString() );
+        any( IRepositoryFileData.class ), nullable( String.class ) );
 
 
     // cache should be cleared for this schema only
@@ -267,7 +267,7 @@ public class MondrianCatalogHelperIT {
     doNothing().when( helperSpy ).init( session );
 
     doReturn( Collections.<MondrianCatalog>emptyList() ).when( helperSpy ).getCatalogs( session );
-    doReturn( null ).when( helperSpy ).makeSchema( anyString() );
+    doReturn( null ).when( helperSpy ).makeSchema( nullable( String.class ) );
 
     MondrianCatalog cat = createTestCatalog();
     RepositoryFileAcl acl = mock( RepositoryFileAcl.class );
@@ -346,10 +346,10 @@ public class MondrianCatalogHelperIT {
         argThat( UnifiedRepositoryTestUtils.isLikeFile( UnifiedRepositoryTestUtils.makeFileObject( metadataPath ) ) ), argThat(
                     UnifiedRepositoryTestUtils.hasData( UnifiedRepositoryTestUtils.pathPropertyPair( "/catalog/definition", "mondrian:/" + "SampleData" ),
                             UnifiedRepositoryTestUtils.pathPropertyPair( "/catalog/datasourceInfo", "Provider=mondrian;DataSource=SampleData" ) ) ),
-        anyString() );
+        nullable( String.class ) );
     verify( repo ).createFile( eq( UnifiedRepositoryTestUtils.makeIdObject( sampleDataFolderPath ) ),
         argThat( UnifiedRepositoryTestUtils.isLikeFile( UnifiedRepositoryTestUtils.makeFileObject( sampleDataFolderPath + RepositoryFile.SEPARATOR + "schema.xml" ) ) ),
-        any( IRepositoryFileData.class ), anyString() );
+        any( IRepositoryFileData.class ), nullable( String.class ) );
 
     // cache should be cleared for this schema only
     verify( olapService, times( 1 ) ).getConnection( "SampleData",  null );
@@ -459,7 +459,7 @@ public class MondrianCatalogHelperIT {
 
     helper.removeCatalog( "mondrian:/SteelWheels", session );
 
-    verify( repo ).deleteFile( eq( UnifiedRepositoryTestUtils.makeIdObject( steelWheelsFolderPath ) ), eq( true ), anyString() );
+    verify( repo ).deleteFile( eq( UnifiedRepositoryTestUtils.makeIdObject( steelWheelsFolderPath ) ), eq( true ), nullable( String.class ) );
 
     // cache should be cleared for this schema only
     verify( olapService, times( 1 ) ).getConnection( CATALOG_NAME, session );
@@ -521,7 +521,7 @@ public class MondrianCatalogHelperIT {
     String schema = helperSpy.applyDSP( session, DATA_SOURCE_INFO_WITH_DSP, SCHEMA_MOCK );
     assertNotNull( schema );
     assertTrue( schema.contains( "REPLACE_TOKEN" ) );
-    verify( helperSpy, never() ).docAtUrlToString( anyString(), any( IPentahoSession.class ) );
+    verify( helperSpy, never() ).docAtUrlToString( nullable( String.class ), any( IPentahoSession.class ) );
 
   }
 
@@ -532,12 +532,12 @@ public class MondrianCatalogHelperIT {
     final String SCHEMA_MOCK = "Test Schema Mock " + replaceTemplate;
 
     MondrianCatalogHelper helperSpy = spy( helper );
-    doReturn( SCHEMA_MOCK ).when( helperSpy ).docAtUrlToString( anyString(), any( IPentahoSession.class ) );
+    doReturn( SCHEMA_MOCK ).when( helperSpy ).docAtUrlToString( nullable( String.class ), any( IPentahoSession.class ) );
 
     IPentahoSession session = new StandaloneSession( "admin" );
     String schema = helperSpy.applyDSP( session, DATA_SOURCE_INFO_WITHOUT_DSP, SCHEMA_MOCK );
     assertNotNull( schema );
-    verify( helperSpy ).docAtUrlToString( anyString(), any( IPentahoSession.class ) );
+    verify( helperSpy ).docAtUrlToString( nullable( String.class ), any( IPentahoSession.class ) );
     assertFalse( schema.contains( "REPLACE_TOKEN" ) );
 
   }
@@ -553,7 +553,7 @@ public class MondrianCatalogHelperIT {
     MondrianCatalogHelper helperSpy = spy( helper );
     doReturn( true ).when( helperSpy ).hasAccess( eq( cat ), any( RepositoryFilePermission.class ) );
     doNothing().when( helperSpy ).init( session );
-    doReturn( cat ).when( helperSpy ).getCatalogFromCache( anyString(), eq( session ) );
+    doReturn( cat ).when( helperSpy ).getCatalogFromCache( nullable( String.class ), eq( session ) );
 
     assertEquals( helperSpy.getCatalog( catalogName, session ).getName(), catalogName );
     verify( helperSpy ).hasAccess( eq( cat ), any( RepositoryFilePermission.class ) );

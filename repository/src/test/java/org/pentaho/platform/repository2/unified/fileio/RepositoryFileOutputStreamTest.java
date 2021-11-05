@@ -36,9 +36,8 @@ import java.io.Serializable;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -85,15 +84,15 @@ public class RepositoryFileOutputStreamTest {
     setInternalState( repositoryFileOutputStream, "repository", repository );
     when( repository.getFile( any() ) ).thenReturn( repositoryFile );
     when(
-      repository.createFile( any( Serializable.class ), any( RepositoryFile.class ), any( IRepositoryFileData.class ),
-        any( String.class ) ) ).thenReturn( repositoryFile );
+      repository.createFile( nullable( Serializable.class ), nullable( RepositoryFile.class ), nullable( IRepositoryFileData.class ),
+        nullable( String.class ) ) ).thenReturn( repositoryFile );
     repositoryFileOutputStream.close();
     assertTrue( repositoryFileOutputStream.flushed );
     assertTrue( repositoryFileOutputStream.forceFlush );
     verify( repositoryFileOutputStream, times( 1 ) ).flush();
     verify( repository, times( 1 ) )
-      .createFile( any( Serializable.class ), any( RepositoryFile.class ), any( IRepositoryFileData.class ),
-        any( String.class ) );
+      .createFile( nullable( Serializable.class ), nullable( RepositoryFile.class ), nullable( IRepositoryFileData.class ),
+        nullable( String.class ) );
   }
 
   @Test
@@ -127,6 +126,6 @@ public class RepositoryFileOutputStreamTest {
     repositoryFileOutputStream.close();
 
     verify( streamListener, times( 1 ) ).streamComplete();
-    verify( streamListener, times( 0 ) ).fileCreated( anyObject() );
+    verify( streamListener, times( 0 ) ).fileCreated( any() );
   }
 }

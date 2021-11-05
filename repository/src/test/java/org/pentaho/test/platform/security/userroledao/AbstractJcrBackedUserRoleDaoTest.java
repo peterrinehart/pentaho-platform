@@ -33,6 +33,8 @@ import javax.jcr.Session;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.security.userroledao.NotFoundException;
 import org.pentaho.platform.api.mt.ITenant;
@@ -40,6 +42,7 @@ import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.security.userroledao.jackrabbit.AbstractJcrBackedUserRoleDao;
 import org.pentaho.platform.security.userroledao.jackrabbit.JcrUserRoleDao;
 
+@RunWith( MockitoJUnitRunner.class )
 public class AbstractJcrBackedUserRoleDaoTest {
 
   private AbstractJcrBackedUserRoleDao roleDao;

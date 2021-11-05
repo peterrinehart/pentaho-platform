@@ -36,9 +36,15 @@ import org.pentaho.platform.engine.core.system.objfac.references.SingletonPentah
 import java.util.Collections;
 import java.util.Dictionary;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by nbaker on 5/3/15.
@@ -105,9 +111,9 @@ public class OSGIRuntimeObjectFactoryTest {
     ServiceRegistration registration2 = mock( ServiceRegistration.class );
     ServiceReference mockRef = mock( ServiceReference.class );
 
-    when(bundleContext.registerService( eq(String.class.getName()), anyObject(), any( Dictionary.class ))).thenReturn(
+    when(bundleContext.registerService( eq(String.class.getName()), any(), any( Dictionary.class ))).thenReturn(
         registration );
-    when(bundleContext.registerService( eq(IPentahoObjectReference.class.getName()), anyObject(), any( Dictionary.class ))).thenReturn( registration2 );
+    when(bundleContext.registerService( eq(IPentahoObjectReference.class.getName()), any(), any( Dictionary.class ))).thenReturn( registration2 );
 
     objectFactory.setBundleContext( bundleContext );
     when( bundleContext.getServiceReference( String.class )).thenReturn( mockRef );

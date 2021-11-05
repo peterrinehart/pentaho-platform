@@ -38,7 +38,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -67,7 +67,7 @@ public class KettleSystemListenerTest {
   @Test
   public void testDefaultDIHome() throws Exception {
     System.setProperty( "DI_HOME", "" );
-    when( mockApplicationContext.getSolutionPath( anyString() ) ).thenReturn( "/kettle" );
+    when( mockApplicationContext.getSolutionPath( nullable( String.class ) ) ).thenReturn( "/kettle" );
 
     KettleSystemListener ksl = new KettleSystemListener();
     ksl.startup( null );

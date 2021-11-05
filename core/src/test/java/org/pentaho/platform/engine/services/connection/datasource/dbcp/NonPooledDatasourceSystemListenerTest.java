@@ -20,7 +20,9 @@
 
 package org.pentaho.platform.engine.services.connection.datasource.dbcp;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -203,8 +205,8 @@ public class NonPooledDatasourceSystemListenerTest {
   }
 
   private void putInRegionCacheWasCalled( int wishedTimes ) {
-    verify( ICacheManagerMock, times( wishedTimes ) ).putInRegionCache( eq( IDBDatasourceService.JDBC_DATASOURCE ), anyString(),
-        anyObject() );
+    verify( ICacheManagerMock, times( wishedTimes ) ).putInRegionCache( eq( IDBDatasourceService.JDBC_DATASOURCE ), nullable( String.class ),
+        any() );
   }
 
   private void isPortUsedByServerCalled( int wishedTimes ) {

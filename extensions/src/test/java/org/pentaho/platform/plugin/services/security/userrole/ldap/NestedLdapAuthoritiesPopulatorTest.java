@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.ldap.core.ContextSource;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -38,8 +38,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 /**
@@ -64,7 +64,7 @@ public class NestedLdapAuthoritiesPopulatorTest {
     NestedLdapAuthoritiesPopulator authPop = spy( authoritiesPopulator );
     when( contextSource.getReadOnlyContext() ).thenReturn( dirContext );
     NamingEnumeration<SearchResult> namingEnumeration = mock( NamingEnumeration.class );
-    when( dirContext.search( anyString(), anyString(), any( SearchControls.class ) ) ).thenReturn( namingEnumeration );
+    when( dirContext.search( nullable( String.class ), nullable( String.class ), any( SearchControls.class ) ) ).thenReturn( namingEnumeration );
 
     Set roles = authoritiesPopulator.getGroupMembershipRoles( "uid=suzy,ou=users,dc=pentaho,dc=org", "suzy" );
     assertNotNull( roles );

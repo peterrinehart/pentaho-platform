@@ -14,7 +14,7 @@
  * See the GNU General Public License for more details.
  *
  *
- * Copyright (c) 2002-2018 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
@@ -23,11 +23,8 @@ package org.pentaho.platform.repository2.unified.jcr;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,6 +48,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.IRepositoryAccessVoterManager;
 import org.pentaho.platform.api.repository2.unified.IRepositoryVersionManager;
@@ -61,13 +60,16 @@ import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author Tatsiana_Kasiankova
  */
-@RunWith( PowerMockRunner.class )
-@PrepareForTest( { JcrRepositoryFileAclUtils.class, JcrRepositoryFileUtils.class } )
+//@RunWith( PowerMockRunner.class )
+//@PowerMockIgnore( "jdk.internal.reflect.*" )
+//@PrepareForTest( { JcrRepositoryFileAclUtils.class, JcrRepositoryFileUtils.class } )
+  @RunWith( MockitoJUnitRunner.class )
 public class JcrRepositoryFileUtilsTest {
   /**
    *
@@ -95,8 +97,8 @@ public class JcrRepositoryFileUtilsTest {
   public void setUp() throws UnsupportedRepositoryOperationException, RepositoryException {
     when( workspaceMock.getVersionManager() ).thenReturn( vmanagerMock );
     when( sessionMock.getWorkspace() ).thenReturn( workspaceMock );
-    when( repositoryVersionManagerMockTrue.isVersioningEnabled( anyString() ) ).thenReturn( true );
-    when( repositoryVersionManagerMockFalse.isVersioningEnabled( anyString() ) ).thenReturn( false );
+    when( repositoryVersionManagerMockTrue.isVersioningEnabled( nullable( String.class) ) ).thenReturn( true );
+    when( repositoryVersionManagerMockFalse.isVersioningEnabled( nullable( String.class) ) ).thenReturn( false );
   }
 
   /**
@@ -107,7 +109,7 @@ public class JcrRepositoryFileUtilsTest {
    */
   @Test
   public void testNoNPEThrows_WhenNPEGettingFromContentRepository() throws Exception {
-    when( vmanagerMock.getBaseVersion( anyString() ) ).thenThrow( new NullPointerException() );
+    when( vmanagerMock.getBaseVersion( nullable( String.class) ) ).thenThrow( new NullPointerException() );
     try {
       String versionId = JcrRepositoryFileUtils.getVersionId( sessionMock, pJcrConstMock, nodeMock );
       assertNull( versionId );
@@ -122,7 +124,7 @@ public class JcrRepositoryFileUtilsTest {
 
   @Test
   public void testRepositoryExceptionThrows() throws Exception {
-    when( vmanagerMock.getBaseVersion( anyString() ) ).thenThrow(
+    when( vmanagerMock.getBaseVersion( nullable( String.class) ) ).thenThrow(
       new RepositoryException( REPOSITORY_EXCEPTION_TEST_MESSAGE ) );
     exception.expect( RepositoryException.class );
     exception.expectMessage( REPOSITORY_EXCEPTION_TEST_MESSAGE );
@@ -140,7 +142,7 @@ public class JcrRepositoryFileUtilsTest {
 
   @Test
   public void testVersionIdIsNull_WhenJCRReturnsNull() throws Exception {
-    when( vmanagerMock.getBaseVersion( anyString() ) ).thenReturn( null );
+    when( vmanagerMock.getBaseVersion( nullable( String.class) ) ).thenReturn( null );
     try {
       String versionId = JcrRepositoryFileUtils.getVersionId( sessionMock, pJcrConstMock, nodeMock );
       assertNull( versionId );
@@ -153,7 +155,7 @@ public class JcrRepositoryFileUtilsTest {
   public void testVersionId_Success() throws Exception {
     Version version = mock( Version.class );
     when( version.getName() ).thenReturn( VERSION_NAME_TEST );
-    when( vmanagerMock.getBaseVersion( anyString() ) ).thenReturn( version );
+    when( vmanagerMock.getBaseVersion( nullable( String.class) ) ).thenReturn( version );
     try {
       String versionId = JcrRepositoryFileUtils.getVersionId( sessionMock, pJcrConstMock, nodeMock );
       assertTrue( VERSION_NAME_TEST.equals( versionId ) );
@@ -178,8 +180,6 @@ public class JcrRepositoryFileUtilsTest {
 
     VersionManagerImpl versionManager = mock( VersionManagerImpl.class );
     when( workspaceMock.getVersionManager() ).thenReturn( versionManager );
-
-    when( mockNode.getParent() ).thenReturn( parentNode );
 
     PentahoJcrConstants pentahoJcrConstants = new PentahoJcrConstants( sessionMock );
 
@@ -232,7 +232,7 @@ public class JcrRepositoryFileUtilsTest {
     IPentahoSession pentahoSession = mock( IPentahoSession.class );
 
     when( pentahoSession.getName() ).thenReturn( username );
-    when( sessionMock.getNodeByIdentifier( anyString() ) ).thenReturn( mockNode );
+    when( sessionMock.getNodeByIdentifier( nullable( String.class) ) ).thenReturn( mockNode );
 
     String[] mockVersionLabels = { "label1" };
     when( mockVersionHistory.getVersionLabels( mockVersion ) ).thenReturn( mockVersionLabels );
@@ -241,7 +241,7 @@ public class JcrRepositoryFileUtilsTest {
     Version[] mockVersionsList = { mockVersion, mockVersion2 };
     Version[] mockVersionsList2 = { mockVersion };
     when( mockVersion.getSuccessors() ).thenReturn( mockVersionsList, mockVersionsList2, null );
-    when( mockVersion.getNode( (String) anyObject() ) ).thenReturn( versionNode );
+    when( mockVersion.getNode( any() ) ).thenReturn( versionNode );
     when( mockVersion.getName() ).thenReturn( versionName );
     when( mockVersion.getCreated() ).thenReturn( cal );
 
@@ -249,7 +249,6 @@ public class JcrRepositoryFileUtilsTest {
     when( workspaceMock.getVersionManager() ).thenReturn( versionManager );
     when( mockVersionHistory.getRootVersion() ).thenReturn( mockVersion );
 
-    when( mockNode.getParent() ).thenReturn( parentNode );
     when( mockNode.getIdentifier() ).thenReturn( mockNodeId );
 
     PentahoJcrConstants pentahoJcrConstants = new PentahoJcrConstants( sessionMock );
@@ -266,11 +265,11 @@ public class JcrRepositoryFileUtilsTest {
     verify( versionManager ).checkin( mockNode.getPath(), cal );
 
     // verify version is deleted
-    verify( mockVersionHistory ).removeVersion( (String) anyObject() );
+    verify( mockVersionHistory ).removeVersion( any() );
   }
 
   @Test
-  public void testCheckNodeForTree() throws Exception {
+  public void testCheckNodeForTree() {
     List<RepositoryFileTree> children = new ArrayList<>();
     IPathConversionHelper pathConversionHelper = new DefaultPathConversionHelper();
     ILockHelper lockHelperMock = mock( ILockHelper.class );
@@ -279,23 +278,28 @@ public class JcrRepositoryFileUtilsTest {
     RepositoryFile fileMock = mock( RepositoryFile.class );
 
     when( fileMock.getId() ).thenReturn( 1 );
+    try ( MockedStatic<JcrRepositoryFileUtils> jcrRepositoryFileUtils = mockStatic( JcrRepositoryFileUtils.class ) ) {
+      jcrRepositoryFileUtils.when( () -> JcrRepositoryFileUtils.checkNodeForTree( nodeMock, children, sessionMock,
+        pJcrConstMock, pathConversionHelper, "childNodeFilter", lockHelperMock, 0, false,
+        repositoryAccessVoterManagerMock, RepositoryRequest.FILES_TYPE_FILTER.FOLDERS, foundFiltered,
+        true, false, "/" ) ).thenCallRealMethod();
+      jcrRepositoryFileUtils.when( () -> JcrRepositoryFileUtils.nodeToFile( sessionMock, pJcrConstMock,
+        pathConversionHelper, lockHelperMock, nodeMock ) ).thenReturn( fileMock );
+      jcrRepositoryFileUtils.when( () -> JcrRepositoryFileUtils.isSupportedNodeType( pJcrConstMock, nodeMock ) )
+        .thenReturn( true );
 
-    PowerMockito.mockStatic( JcrRepositoryFileUtils.class );
-    PowerMockito.mockStatic( JcrRepositoryFileAclUtils.class );
+      try ( MockedStatic<JcrRepositoryFileAclUtils> jcrRepositoryFileAclUtils = mockStatic( JcrRepositoryFileAclUtils.class ) ) {
+        jcrRepositoryFileAclUtils.when( () -> JcrRepositoryFileAclUtils.getAcl( sessionMock, pJcrConstMock, 1 ) )
+          .thenThrow( new AccessDeniedException() );
 
-    PowerMockito.doCallRealMethod().when( JcrRepositoryFileUtils.class, "checkNodeForTree", nodeMock,
-      children, sessionMock, pJcrConstMock, pathConversionHelper, "childNodeFilter", lockHelperMock, 0, false, repositoryAccessVoterManagerMock, RepositoryRequest.FILES_TYPE_FILTER.FOLDERS, foundFiltered, true, false, "/" );
-    when( JcrRepositoryFileUtils.nodeToFile( sessionMock, pJcrConstMock, pathConversionHelper, lockHelperMock, nodeMock ) ).thenReturn( fileMock );
-    when( JcrRepositoryFileUtils.isSupportedNodeType( pJcrConstMock, nodeMock ) ).thenReturn( true );
-    when( JcrRepositoryFileAclUtils.getAcl( sessionMock, pJcrConstMock, 1 ) ).thenThrow( new AccessDeniedException() );
-
-    try {
-      JcrRepositoryFileUtils.checkNodeForTree( nodeMock, children, sessionMock, pJcrConstMock, pathConversionHelper,
-        "childNodeFilter", lockHelperMock, 0, false, repositoryAccessVoterManagerMock,
-        RepositoryRequest.FILES_TYPE_FILTER.FOLDERS, foundFiltered, true, false, "/" );
-    } catch ( Exception e ) {
-      fail();
+        try {
+          JcrRepositoryFileUtils.checkNodeForTree( nodeMock, children, sessionMock, pJcrConstMock, pathConversionHelper,
+            "childNodeFilter", lockHelperMock, 0, false, repositoryAccessVoterManagerMock,
+            RepositoryRequest.FILES_TYPE_FILTER.FOLDERS, foundFiltered, true, false, "/" );
+        } catch ( Exception e ) {
+          fail();
+        }
+      }
     }
   }
-
 }

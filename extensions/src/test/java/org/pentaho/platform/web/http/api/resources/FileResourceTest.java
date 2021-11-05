@@ -14,7 +14,7 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002-2020 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
@@ -58,6 +58,7 @@ import org.pentaho.platform.web.http.messages.Messages;
 import org.pentaho.test.mock.MockPentahoRole;
 import org.pentaho.test.mock.MockPentahoUser;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
@@ -89,11 +90,11 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -107,6 +108,7 @@ import static org.pentaho.platform.web.http.api.resources.FileResource.REPOSITOR
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 @PrepareForTest( { TenantUtils.class, FileResource.class } )
 public class FileResourceTest {
   private static final String ACL_OWNER = "ACL_Owner";
@@ -315,7 +317,7 @@ public class FileResourceTest {
     UnifiedRepositoryAccessDeniedException mockedException = mock( UnifiedRepositoryAccessDeniedException.class );
     doThrow( mockedException ).when( fileResource.fileService ).doRestoreFiles( FILE_ID );
     doReturn( "user/home" ).when( fileResource ).getUserHomeFolder();
-    doReturn( false ).when( fileResource.fileService ).canRestoreToFolderWithNoConflicts( anyString(), eq( FILE_ID ) );
+    doReturn( false ).when( fileResource.fileService ).canRestoreToFolderWithNoConflicts( nullable( String.class ), eq( FILE_ID ) );
 
     Response response = fileResource.doRestore( FILE_ID, null );
     assertNotEquals( response.getStatus(), INTERNAL_SERVER_ERROR.getStatusCode() );
@@ -347,7 +349,7 @@ public class FileResourceTest {
     Response testResponse = fileResource.createFile( PATH_ID_WITHOUTH_EXTENSION, mockInputStream );
     assertEquals( INTERNAL_SERVER_ERROR.getStatusCode(), testResponse.getStatus() );
 
-    verify( fileResource, times( 1 ) ).buildServerErrorResponse( anyString() );
+    verify( fileResource, times( 1 ) ).buildServerErrorResponse( nullable( String.class ) );
   }
 
   @Test
@@ -356,7 +358,7 @@ public class FileResourceTest {
     Response testResponse = fileResource.createFile( PATH_ID_INCORRECT_EXTENSION, mockInputStream );
     assertEquals( INTERNAL_SERVER_ERROR.getStatusCode(), testResponse.getStatus() );
 
-    verify( fileResource, times( 1 ) ).buildServerErrorResponse( anyString() );
+    verify( fileResource, times( 1 ) ).buildServerErrorResponse( nullable( String.class ) );
   }
 
   @Test
@@ -390,7 +392,7 @@ public class FileResourceTest {
 
     doReturn( charsetName ).when( fileResource.httpServletRequest ).getCharacterEncoding();
     doReturn( repositoryFileOutputStream ).when( fileResource.fileService )
-      .getRepositoryFileOutputStream( anyString() );
+      .getRepositoryFileOutputStream( nullable( String.class ) );
     doCallRealMethod().when( fileResource.fileService )
       .createFile( charsetName, PATH_SPECIAL_CHARACTERS, mockInputStream );
 
@@ -407,7 +409,7 @@ public class FileResourceTest {
 
     doReturn( charsetName ).when( fileResource.httpServletRequest ).getCharacterEncoding();
     doReturn( repositoryFileOutputStream ).when( fileResource.fileService )
-      .getRepositoryFileOutputStream( anyString() );
+      .getRepositoryFileOutputStream( nullable( String.class ) );
     doCallRealMethod().when( fileResource.fileService )
       .createFile( charsetName, PATH_JAPANESE_CHARACTERS, mockInputStream );
 
@@ -1525,19 +1527,19 @@ public class FileResourceTest {
     assertEquals( FORBIDDEN.getStatusCode(), testResponse.getStatus() );
     assertEquals( testResponse.getEntity(), "containsIllegalCharacters" );
     verify( fileResource, times( 0 ) ).buildOkResponse();
-    verify( fileResource.fileService, times( 0 ) ).doRename( anyString(), anyString() );
+    verify( fileResource.fileService, times( 0 ) ).doRename( nullable( String.class ), nullable( String.class ) );
   }
 
   @Test
   public void testDoRename_Special_Characters() throws Exception {
     fileResource.doRename( PATH_ID, PATH_SPECIAL_CHARACTERS );
-    verify( fileResource.fileService, times( 1 ) ).doRename( anyString(), anyString() );
+    verify( fileResource.fileService, times( 1 ) ).doRename( nullable( String.class ), nullable( String.class ) );
   }
 
   @Test
   public void testDoRename_Japanese_Characters() throws Exception {
     fileResource.doRename( PATH_ID, PATH_JAPANESE_CHARACTERS );
-    verify( fileResource.fileService, times( 1 ) ).doRename( anyString(), anyString() );
+    verify( fileResource.fileService, times( 1 ) ).doRename( nullable( String.class ), nullable( String.class ) );
   }
 
 

@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -55,7 +55,7 @@ public class PluggableUploadFileServletTest {
   public void testXSSUsingPathInfo() throws Exception {
     when( httpServletRequest.getPathInfo() ).thenReturn( "<script>alert('XSS')</script>" );
     IPluginManager pluginManager = mock( IPluginManager.class );
-    when( pluginManager.isBeanRegistered( anyString() ) ).thenReturn( false );
+    when( pluginManager.isBeanRegistered( nullable( String.class ) ) ).thenReturn( false );
     PentahoSystem.registerObject( pluginManager );
     try ( StringWriter stringWriter = new StringWriter();
           PrintWriter printWriter = new PrintWriter( stringWriter ) ) {

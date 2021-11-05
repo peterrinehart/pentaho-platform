@@ -14,7 +14,7 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002-2020 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
@@ -49,9 +49,11 @@ import org.pentaho.reporting.libraries.docbundle.DocumentMetaData;
 import org.pentaho.reporting.libraries.docbundle.ODFMetaAttributeNames;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 @PrepareForTest( { DefaultUnifiedRepositoryWebService.class, FileService.class } )
 public class PRPTImportHandlerTest {
 
@@ -78,15 +80,15 @@ public class PRPTImportHandlerTest {
     final IPlatformMimeResolver resolver = mock( IPlatformMimeResolver.class );
 
     pentahoObjectFactory = mock( IPentahoObjectFactory.class );
-    when( pentahoObjectFactory.objectDefined( anyString() ) ).thenReturn( true );
-    when( pentahoObjectFactory.get( eq( IPlatformMimeResolver.class ), anyString(), any( IPentahoSession.class ) ) )
+    when( pentahoObjectFactory.objectDefined( nullable( String.class ) ) ).thenReturn( true );
+    when( pentahoObjectFactory.get( eq( IPlatformMimeResolver.class ), nullable( String.class ), any( IPentahoSession.class ) ) )
         .thenAnswer( new Answer<Object>() {
           @Override
           public Object answer( InvocationOnMock invocation ) throws Throwable {
             return resolver;
           }
         } );
-    when( pentahoObjectFactory.get( eq( IPlatformImporter.class ), anyString(), any( IPentahoSession.class ) ) )
+    when( pentahoObjectFactory.get( eq( IPlatformImporter.class ), nullable( String.class ), any( IPentahoSession.class ) ) )
       .thenAnswer( new Answer<Object>() {
         @Override
         public Object answer( InvocationOnMock invocation ) throws Throwable {
@@ -145,7 +147,7 @@ public class PRPTImportHandlerTest {
   public void testImportFile_metadataReturnOnlyDescription() throws Exception {
     when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
     DocumentMetaData metadata = mock( DocumentMetaData.class );
-    when( metadata.getBundleAttribute( anyString(), eq( ODFMetaAttributeNames.DublinCore.DESCRIPTION ) ) )
+    when( metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.DESCRIPTION ) ) )
         .thenReturn( ODFMetaAttributeNames.DublinCore.DESCRIPTION );
     doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
     handler.importFile( bundle );
@@ -157,7 +159,7 @@ public class PRPTImportHandlerTest {
   public void testImportFile_metadataReturnOnlyTitle() throws Exception {
     when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
     DocumentMetaData metadata = mock( DocumentMetaData.class );
-    when( metadata.getBundleAttribute( anyString(), eq( ODFMetaAttributeNames.DublinCore.TITLE ) ) )
+    when( metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.TITLE ) ) )
       .thenReturn( ODFMetaAttributeNames.DublinCore.TITLE );
     doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
     handler.importFile( bundle );
@@ -169,9 +171,9 @@ public class PRPTImportHandlerTest {
   public void testImportFile_metadataIsCorrect() throws Exception {
     when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
     DocumentMetaData metadata = mock( DocumentMetaData.class );
-    when( metadata.getBundleAttribute( anyString(), eq( ODFMetaAttributeNames.DublinCore.DESCRIPTION ) ) )
+    when( metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.DESCRIPTION ) ) )
       .thenReturn( ODFMetaAttributeNames.DublinCore.DESCRIPTION );
-    when( metadata.getBundleAttribute( anyString(), eq( ODFMetaAttributeNames.DublinCore.TITLE ) ) )
+    when( metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.TITLE ) ) )
       .thenReturn( ODFMetaAttributeNames.DublinCore.TITLE );
     doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
     handler.importFile( bundle );

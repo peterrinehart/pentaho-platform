@@ -21,7 +21,7 @@
 package org.pentaho.platform.web.http.api.resources;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
@@ -66,12 +66,12 @@ public class RepositoryImportResourceIT {
     ITenant tenat = mock( ITenant.class );
 
     resolver = mock( ITenantedPrincipleNameResolver.class );
-    doReturn( tenat ).when( resolver ).getTenant( anyString() );
-    doReturn( REAL_USER ).when( resolver ).getPrincipleName( anyString() );
+    doReturn( tenat ).when( resolver ).getTenant( nullable( String.class ) );
+    doReturn( REAL_USER ).when( resolver ).getPrincipleName( nullable( String.class ) );
     policy = mock( IAuthorizationPolicy.class );
     pentahoObjectFactory = mock( IPentahoObjectFactory.class );
-    when( pentahoObjectFactory.objectDefined( anyString() ) ).thenReturn( true );
-    when( pentahoObjectFactory.get( this.anyClass(), anyString(), any( IPentahoSession.class ) ) ).thenAnswer(
+    when( pentahoObjectFactory.objectDefined( nullable( String.class ) ) ).thenReturn( true );
+    when( pentahoObjectFactory.get( this.anyClass(), nullable( String.class ), any( IPentahoSession.class ) ) ).thenAnswer(
         new Answer<Object>() {
           @Override
           public Object answer( InvocationOnMock invocation ) throws Throwable {
@@ -118,7 +118,7 @@ public class RepositoryImportResourceIT {
   }
 
   private void testValidateAccess( final List<String> perms ) throws PentahoAccessControlException {
-    when( policy.isAllowed( anyString() ) ).thenAnswer( new Answer<Boolean>() {
+    when( policy.isAllowed( nullable( String.class ) ) ).thenAnswer( new Answer<Boolean>() {
 
       @Override
       public Boolean answer( InvocationOnMock invocation ) throws Throwable {

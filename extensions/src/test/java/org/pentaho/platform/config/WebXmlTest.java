@@ -28,12 +28,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 /**
@@ -171,7 +171,7 @@ public class WebXmlTest {
     Node subNode = mock( Node.class );
     when( subNode.getText() ).thenReturn( "test node content" );
     when( node.selectSingleNode( "../param-value" ) ).thenReturn( subNode );
-    when( document.selectSingleNode( anyString() ) ).thenReturn( node );
+    when( document.selectSingleNode( nullable( String.class ) ) ).thenReturn( node );
 
     String test = webXml.getContextParamValue( "test" );
     assertEquals( "test node content", test );
@@ -185,7 +185,7 @@ public class WebXmlTest {
 
     Node node = mock( Node.class );
     when( node.selectSingleNode( "../param-value" ) ).thenReturn( null );
-    when( document.selectSingleNode( anyString() ) ).thenReturn( node );
+    when( document.selectSingleNode( nullable( String.class ) ) ).thenReturn( node );
 
     String test = webXml.getContextParamValue( "test" );
     assertNull( test );
@@ -196,7 +196,7 @@ public class WebXmlTest {
   public void testGetContextParamValue_nullNode() throws Exception {
     webXml = new WebXml( document );
 
-    when( document.selectSingleNode( anyString() ) ).thenReturn( null );
+    when( document.selectSingleNode( nullable( String.class ) ) ).thenReturn( null );
 
     String test = webXml.getContextParamValue( "test" );
     assertNull( test );
@@ -210,7 +210,7 @@ public class WebXmlTest {
     Node subNode = mock( Node.class );
     when( subNode.getText() ).thenReturn( "test node content" );
     when( node.selectSingleNode( "../jsp-file" ) ).thenReturn( subNode );
-    when( document.selectSingleNode( anyString() ) ).thenReturn( node );
+    when( document.selectSingleNode( nullable( String.class ) ) ).thenReturn( node );
 
     String test = webXml.getServletMapping( "test" );
     assertEquals( "test node content", test );
@@ -224,7 +224,7 @@ public class WebXmlTest {
 
     Node node = mock( Node.class );
     when( node.selectSingleNode( "../jsp-file" ) ).thenReturn( null );
-    when( document.selectSingleNode( anyString() ) ).thenReturn( node );
+    when( document.selectSingleNode( nullable( String.class ) ) ).thenReturn( node );
 
     String test = webXml.getServletMapping( "test" );
     assertNull( test );
@@ -235,7 +235,7 @@ public class WebXmlTest {
   public void testGetServletMapping_nullNode() throws Exception {
     webXml = new WebXml( document );
 
-    when( document.selectSingleNode( anyString() ) ).thenReturn( null );
+    when( document.selectSingleNode( nullable( String.class ) ) ).thenReturn( null );
 
     String test = webXml.getServletMapping( "test" );
     assertNull( test );
@@ -249,7 +249,7 @@ public class WebXmlTest {
     Element parent = mock( Element.class ); ;
     when( node.getParent() ).thenReturn( parent );
 
-    when( document.selectSingleNode( anyString() ) ).thenReturn( node );
+    when( document.selectSingleNode( nullable( String.class ) ) ).thenReturn( node );
 
     webXml.setContextParamValue( "key", null );
     verify( parent ).detach();
@@ -262,10 +262,10 @@ public class WebXmlTest {
     when( document.getRootElement() ).thenReturn( root );
     Element node = mock( Element.class );
     Element paramNode = mock( Element.class );
-    when( root.addElement( anyString() ) ).thenReturn( node );
+    when( root.addElement( nullable( String.class ) ) ).thenReturn( node );
     when( node.getParent() ).thenReturn( root );
-    when( document.selectSingleNode( anyString() ) ).thenReturn( null );
-    when( node.addElement( anyString() ) ).thenReturn( paramNode );
+    when( document.selectSingleNode( nullable( String.class ) ) ).thenReturn( null );
+    when( node.addElement( nullable( String.class ) ) ).thenReturn( paramNode );
 
     webXml.setContextParamValue( "key", value );
     verify( root ).addElement( WebXml.CONTEXT_PARAM_ELEMENT );
@@ -276,7 +276,7 @@ public class WebXmlTest {
   @Test
   public void testSetServletMapping_noMatch() throws Exception {
     webXml = new WebXml( document );
-    when( document.selectSingleNode( anyString() ) ).thenReturn( null );
+    when( document.selectSingleNode( nullable( String.class ) ) ).thenReturn( null );
     assertFalse( webXml.setServletMapping( "key", value ) );
   }
 
@@ -285,7 +285,7 @@ public class WebXmlTest {
     webXml = new WebXml( document );
     Element node = mock( Element.class );
     Element jspNode = mock( Element.class );
-    when( document.selectSingleNode( anyString() ) ).thenReturn( node );
+    when( document.selectSingleNode( nullable( String.class ) ) ).thenReturn( node );
     when( node.selectSingleNode( "../jsp-file" ) ).thenReturn( jspNode );
     assertTrue( webXml.setServletMapping( "key", value ) );
     verify( jspNode ).setText( value );

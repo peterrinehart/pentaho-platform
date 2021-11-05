@@ -55,7 +55,7 @@ public class GenericServletTest {
     orderInvocation.verify( req ).getServletPath();
     orderInvocation.verify( req ).getPathInfo();
     orderInvocation.verify( req ).getParameterMap();
-    orderInvocation.verify( req ).getParameter( Mockito.anyString() );
+    orderInvocation.verify( req ).getParameter( Mockito.nullable( String.class ) );
     orderInvocation.verify( req ).getInputStream();
   }
 

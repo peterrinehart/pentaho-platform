@@ -85,7 +85,7 @@ public class GetResourceIT {
     servlet = spy( new GetResource() );
     final ServletConfig servletConfig = mock( ServletConfig.class );
     final ServletContext servletContext = mock( ServletContext.class );
-    when( servletContext.getMimeType( anyString() ) ).thenReturn( TEST_MIME_TYPE );
+    when( servletContext.getMimeType( nullable( String.class ) ) ).thenReturn( TEST_MIME_TYPE );
     when( servletConfig.getServletContext() ).thenReturn( servletContext );
     servlet.init( servletConfig );
 
