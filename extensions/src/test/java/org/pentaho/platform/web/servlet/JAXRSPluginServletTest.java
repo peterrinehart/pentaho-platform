@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -52,7 +53,7 @@ public class JAXRSPluginServletTest {
     when( response.getStatus() ).thenReturn( httpStatusCode );
 
     //TODO: this isn't working for two of the tests. Probably reach out to Andre Rua who wrote the test to see if he can rewrite
-    doNothing().when( (SpringServlet) servlet ).service( any(), any()  );
+    doCallRealMethod().when( (SpringServlet) servlet ).service( any(), any()  );
 
 
     servlet.service( request, response );

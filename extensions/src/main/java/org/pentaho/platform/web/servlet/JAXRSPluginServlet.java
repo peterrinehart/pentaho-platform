@@ -44,6 +44,7 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+
 /**
  * This should only be used by a plugin in the plugin.spring.xml file to initialize a Jersey. The presence of this
  * servlet in the spring file will make it possible to write JAX-RS POJOs in your plugin.
@@ -92,26 +93,26 @@ public class JAXRSPluginServlet extends SpringServlet implements ApplicationCont
     if ( WADL_PATTERN.matcher( request.getPathInfo() ).find() ) {
       final HttpServletRequest originalRequest = request;
       final String appWadlUrl = request.getPathInfo().substring(
-          request.getPathInfo().indexOf( APPLICATION_WADL ), request.getPathInfo().length() );
+        request.getPathInfo().indexOf( APPLICATION_WADL ), request.getPathInfo().length() );
       request =
-          (HttpServletRequest) Proxy.newProxyInstance( getClass().getClassLoader(),
-              new Class[]{HttpServletRequest.class}, new InvocationHandler() {
-                public Object invoke( Object proxy, Method method, Object[] args ) throws Throwable {
-                  if ( method.getName().equals( "getPathInfo" ) ) {
-                    return appWadlUrl;
-                  } else if ( method.getName().equals( "getRequestURL" ) ) {
-                    String url = originalRequest.getRequestURL().toString();
-                    return new StringBuffer(
-                        url.substring( 0, url.indexOf( originalRequest.getPathInfo() ) ) + "/" + appWadlUrl );
-                  } else if ( method.getName().equals( "getRequestURI" ) ) {
-                    String uri = originalRequest.getRequestURI();
-                    return uri.substring( 0, uri.indexOf( originalRequest.getPathInfo() ) ) + "/" + appWadlUrl;
-                  }
-                  // We don't care about the Method, delegate out to real Request object.
-                  return method.invoke( originalRequest, args );
-                }
+        (HttpServletRequest) Proxy.newProxyInstance( getClass().getClassLoader(),
+          new Class[]{HttpServletRequest.class}, new InvocationHandler() {
+            public Object invoke( Object proxy, Method method, Object[] args ) throws Throwable {
+              if ( method.getName().equals( "getPathInfo" ) ) {
+                return appWadlUrl;
+              } else if ( method.getName().equals( "getRequestURL" ) ) {
+                String url = originalRequest.getRequestURL().toString();
+                return new StringBuffer(
+                  url.substring( 0, url.indexOf( originalRequest.getPathInfo() ) ) + "/" + appWadlUrl );
+              } else if ( method.getName().equals( "getRequestURI" ) ) {
+                String uri = originalRequest.getRequestURI();
+                return uri.substring( 0, uri.indexOf( originalRequest.getPathInfo() ) ) + "/" + appWadlUrl;
               }
-          );
+              // We don't care about the Method, delegate out to real Request object.
+              return method.invoke( originalRequest, args );
+            }
+          }
+        );
       if ( originalRequest.getRequestURL() != null ) {
         requestThread.set( originalRequest.getRequestURL().toString() );
       } else if ( originalRequest.getRequestURI() != null ) {
