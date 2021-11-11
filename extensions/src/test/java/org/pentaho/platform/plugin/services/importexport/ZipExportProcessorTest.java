@@ -14,36 +14,11 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002-2018 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
 package org.pentaho.platform.plugin.services.importexport;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -76,6 +51,32 @@ import org.pentaho.platform.engine.core.system.StandaloneSession;
 import org.pentaho.platform.engine.core.system.boot.PlatformInitializationException;
 import org.pentaho.platform.engine.services.solution.SolutionEngine;
 import org.pentaho.test.platform.engine.core.MicroPlatform;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class ZipExportProcessorTest {
 
@@ -142,13 +143,13 @@ public class ZipExportProcessorTest {
 
     };
     Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFile( nullable( String.class ) );
-    Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFile( nullable( String.class ), Mockito.anyBoolean() );
-    Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFile( nullable( String.class ), Mockito.anyBoolean(),
+    Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFile( nullable( String.class ), anyBoolean() );
+    Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFile( nullable( String.class ), anyBoolean(),
         any( IPentahoLocale.class ) );
     Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFile( nullable( String.class ), any( IPentahoLocale.class ) );
     Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFileById( any( Serializable.class ) );
-    Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFileById( any( Serializable.class ), Mockito.anyBoolean() );
-    Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFileById( any( Serializable.class ), Mockito.anyBoolean(),
+    Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFileById( any( Serializable.class ), anyBoolean() );
+    Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFileById( any( Serializable.class ), anyBoolean(),
         any( IPentahoLocale.class ) );
     Mockito.doAnswer( answerRepoGetFile ).when( repo ).getFileById( any( Serializable.class ),
         any( IPentahoLocale.class ) );
@@ -179,8 +180,7 @@ public class ZipExportProcessorTest {
     doReturn( availableLocales ).when( repo ).getAvailableLocalesForFileById( Mockito.any( Serializable.class ) );
     doReturn( availableLocales ).when( repo ).getAvailableLocalesForFileByPath( Mockito.any( String.class ) );
 
-    doReturn( localePropertries ).when( repo ).getLocalePropertiesForFileById( Mockito.any( File.class ),
-        Mockito.nullable( String.class ) );
+    doReturn( localePropertries ).when( repo ).getLocalePropertiesForFileById( Mockito.any( String.class ), Mockito.any( String.class ) );
 
     RepositoryFileSid sid = mock( RepositoryFileSid.class );
     doReturn( "testUser" ).when( sid ).getName();

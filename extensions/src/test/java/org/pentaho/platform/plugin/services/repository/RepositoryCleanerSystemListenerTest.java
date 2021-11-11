@@ -14,7 +14,7 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002-2018 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
@@ -23,6 +23,7 @@ package org.pentaho.platform.plugin.services.repository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.pentaho.platform.api.scheduler2.CronJobTrigger;
 import org.pentaho.platform.api.scheduler2.IJobFilter;
 import org.pentaho.platform.api.scheduler2.IJobTrigger;
@@ -33,6 +34,7 @@ import org.pentaho.platform.plugin.services.repository.RepositoryCleanerSystemLi
 import org.pentaho.test.platform.engine.core.MicroPlatform;
 
 import java.util.Collections;
+import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -95,7 +97,7 @@ public class RepositoryCleanerSystemListenerTest {
   }
 
   private void verifyJobCreated( Frequency frequency ) throws SchedulerException {
-    verify( scheduler ).createJob( eq( RepositoryGcJob.JOB_NAME ), eq( RepositoryGcJob.class ), anyMap(),
+    verify( scheduler ).createJob( eq( RepositoryGcJob.JOB_NAME ), eq( RepositoryGcJob.class ), ArgumentMatchers.nullable( Map.class ),
       isA( frequency.createTrigger().getClass() ) );
   }
 

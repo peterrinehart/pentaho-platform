@@ -20,21 +20,35 @@
 
 package org.apache.jackrabbit.core.security.authorization.acl;
 
+import org.apache.jackrabbit.api.JackrabbitWorkspace;
 import org.apache.jackrabbit.api.security.principal.PrincipalManager;
 import org.apache.jackrabbit.core.NodeImpl;
 import org.apache.jackrabbit.core.SessionImpl;
+import org.apache.jackrabbit.core.nodetype.NodeTypeImpl;
+import org.apache.jackrabbit.core.security.authorization.AbstractAccessControlProvider;
+import org.apache.jackrabbit.core.security.authorization.PrivilegeManagerImpl;
+import org.apache.jackrabbit.spi.Name;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalMatchers;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.Whitebox;
 
 import javax.jcr.Node;
+import javax.jcr.Workspace;
 import javax.jcr.security.AccessControlEntry;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.Privilege;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_MOCKS;
+import static org.mockito.Mockito.RETURNS_SMART_NULLS;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.junit.Assert.*;
 
@@ -44,7 +58,8 @@ public class PentahoACLProviderTest {
   private PentahoACLProvider provider;
 
   private SessionImpl systemSession;
-  private Node rootNode;
+  private NodeImpl rootNode;
+  private NodeImpl nodeMock;
   private ACLEditor editor;
   private PrincipalManager pMgr;
   private AccessControlManager acMgr;
@@ -52,10 +67,14 @@ public class PentahoACLProviderTest {
   private ACLTemplate acList;
   private ACLTemplate.Entry aclEntry;
   private Privilege jcrReadAccessControlPriv;
+  private JackrabbitWorkspace mockWorkspace;
+  private PrivilegeManagerImpl mockPrivilegeManager;
+  private NodeTypeImpl mockNodeTypeImpl;
+  private Name mockName;
 
   @Before
   public void setup() throws Exception {
-    systemSession = Mockito.mock( SessionImpl.class );
+    systemSession = Mockito.mock( SessionImpl.class, RETURNS_MOCKS );
     rootNode = Mockito.mock( NodeImpl.class );
     pMgr = Mockito.mock( PrincipalManager.class );
     editor = Mockito.mock( ACLEditor.class );
@@ -64,10 +83,21 @@ public class PentahoACLProviderTest {
     everyone = Mockito.mock( Principal.class );
     aclEntry = Mockito.mock( ACLTemplate.Entry.class );
     jcrReadAccessControlPriv = Mockito.mock( Privilege.class );
+    nodeMock = Mockito.mock( NodeImpl.class, RETURNS_SMART_NULLS );
+    mockWorkspace = Mockito.mock( JackrabbitWorkspace.class, RETURNS_MOCKS );
+    mockPrivilegeManager = Mockito.mock( PrivilegeManagerImpl.class );
+    mockNodeTypeImpl = Mockito.mock( NodeTypeImpl.class );
+    mockName = Mockito.mock( Name.class );
 
     when( systemSession.getRootNode() ).thenReturn( rootNode );
     when( systemSession.getPrincipalManager() ).thenReturn( pMgr );
     when( systemSession.getAccessControlManager() ).thenReturn( acMgr );
+    when( systemSession.getWorkspace() ).thenReturn( mockWorkspace );
+    when( systemSession.getNode( AdditionalMatchers.or( anyString(), eq( null ) ) ) ).thenReturn( nodeMock );
+    when( nodeMock.isNode() ).thenReturn( true );
+    when( nodeMock.getPrimaryNodeType() ).thenReturn( mockNodeTypeImpl );
+    when( mockNodeTypeImpl.getQName() ).thenReturn( mockName );
+    when( mockWorkspace.getPrivilegeManager() ).thenReturn( mockPrivilegeManager );
     when( rootNode.getPath() ).thenReturn( rootPath );
     when( pMgr.getEveryone() ).thenReturn( everyone );
     when( acMgr.privilegeFromName( Privilege.JCR_READ_ACCESS_CONTROL ) ).thenReturn( jcrReadAccessControlPriv );
@@ -79,7 +109,10 @@ public class PentahoACLProviderTest {
     when( acList.getAccessControlEntries() ).thenReturn( acEntries );
 
     provider = new PentahoACLProvider();
-    Whitebox.setInternalState( provider, "session", systemSession );
+    //Whitebox.setInternalState( provider, "session", systemSession );
+    Map configMap = new HashMap();
+    configMap.put( AbstractAccessControlProvider.PARAM_OMIT_DEFAULT_PERMISSIONS, null );
+    provider.init( systemSession, configMap );
   }
 
   @Test

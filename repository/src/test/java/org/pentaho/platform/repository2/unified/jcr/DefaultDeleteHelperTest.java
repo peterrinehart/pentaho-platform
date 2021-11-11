@@ -24,7 +24,7 @@ import org.apache.jackrabbit.spi.commons.name.NameConstants;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.pentaho.platform.api.engine.IPentahoSession;
@@ -114,7 +114,7 @@ public class DefaultDeleteHelperTest {
 
     final RepositoryFileProxy repositoryFileProxy = mock( RepositoryFileProxy.class );
     final RepositoryFileProxyFactory repositoryFileProxyFactory = mock( RepositoryFileProxyFactory.class );
-    when( repositoryFileProxyFactory.getProxy( Matchers.<Node>anyObject(), Matchers.<IPentahoLocale>anyObject() ) )
+    when( repositoryFileProxyFactory.getProxy( ArgumentMatchers.<Node>any(), ArgumentMatchers.<IPentahoLocale>any() ) )
         .thenReturn( repositoryFileProxy );
     // set file ID to random value to make different files not equal
     when( repositoryFileProxy.getId() ).thenAnswer( new Answer<Object>() {
@@ -267,8 +267,8 @@ public class DefaultDeleteHelperTest {
     final QueryObjectModel queryObjectModel = mock( QueryObjectModel.class );
 
     final QueryObjectModelFactory qomFactory = mock( QueryObjectModelFactory.class );
-    when( qomFactory.createQuery( Matchers.<Source>any(), Matchers.<Constraint>any(), Matchers.<Ordering[]>any(),
-        Matchers.<Column[]>any() ) ).thenReturn( queryObjectModel );
+    when( qomFactory.createQuery( ArgumentMatchers.<Source>any(), ArgumentMatchers.<Constraint>any(), ArgumentMatchers.<Ordering[]>any(),
+        ArgumentMatchers.<Column[]>any() ) ).thenReturn( queryObjectModel );
     when( qomFactory.selector( nullable( String.class), nullable( String.class) ) ).thenReturn( selector );
 
     final QueryResult queryResult = mock( QueryResult.class );

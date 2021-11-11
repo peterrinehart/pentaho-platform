@@ -14,7 +14,7 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002-2018 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
@@ -75,8 +75,8 @@ public class CopyFilesOperation_DeepFolderCopyTest {
     to = mockFolder();
 
     doReturn( mockFolder() ).when( repo )
-      .createFolder( any( Serializable.class ), any( RepositoryFile.class ), any(
-        RepositoryFileAcl.class ), nullable( String.class ) );
+      .createFolder( any( Serializable.class ), any( RepositoryFile.class ), nullable( RepositoryFileAcl.class ),
+        nullable( String.class ) );
 
     doCallRealMethod().when( operation ).performFolderDeepCopy( any( RepositoryFile.class ),
       any( RepositoryFile.class ), anyInt() );
@@ -165,10 +165,10 @@ public class CopyFilesOperation_DeepFolderCopyTest {
       .performFolderDeepCopy( any( RepositoryFile.class ), any( RepositoryFile.class ), anyInt() );
 
     verify( repo, times( newFolders ) )
-      .createFolder( any( Serializable.class ), any( RepositoryFile.class ), any( RepositoryFileAcl.class ),
+      .createFolder( any( Serializable.class ), any( RepositoryFile.class ), nullable( RepositoryFileAcl.class ),
         nullable( String.class ) );
 
-    verify( repo, times( newFiles ) ).createFile( any( RepositoryFile.class ), any( RepositoryFile.class ), any(
+    verify( repo, times( newFiles ) ).createFile( anyString(), any( RepositoryFile.class ), nullable(
       IRepositoryFileData.class ), nullable( String.class ) );
   }
 

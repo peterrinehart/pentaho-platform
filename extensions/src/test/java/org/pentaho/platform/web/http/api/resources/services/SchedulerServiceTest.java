@@ -14,7 +14,7 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002-2018 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -51,6 +52,8 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.IAuthorizationPolicy;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.ISecurityHelper;
@@ -77,13 +80,16 @@ import org.pentaho.platform.web.http.api.resources.SchedulerOutputPathResolver;
 import org.pentaho.platform.web.http.api.resources.SessionResource;
 import org.pentaho.platform.web.http.api.resources.proxies.BlockStatusProxy;
 
+@RunWith( MockitoJUnitRunner.class )
 public class SchedulerServiceTest {
 
   private static SchedulerService schedulerService;
 
   @Before
-  public void setUp() {
+  public void setUp() throws SchedulerException, IOException, IllegalAccessException {
     schedulerService = spy( new SchedulerService() );
+    doCallRealMethod().when( schedulerService ).createJob( any() );
+
     schedulerService.policy = mock( IAuthorizationPolicy.class );
     schedulerService.scheduler = mock( IScheduler.class );
     schedulerService.repository = mock( IUnifiedRepository.class );
@@ -202,7 +208,7 @@ public class SchedulerServiceTest {
     doReturn( jobParameters ).when( scheduleRequest ).getJobParameters();
     doNothing().when( scheduleRequest ).setJobName( nullable( String.class ) );
 
-    doReturn( true ).when( schedulerService ).isPdiFile( any( RepositoryFile.class ) );
+    doReturn( true ).when( schedulerService ).isPdiFile( nullable( RepositoryFile.class ) );
 
     SchedulerOutputPathResolver schedulerOutputPathResolver = mock( SchedulerOutputPathResolver.class );
     doReturn( "outputFile" ).when( schedulerOutputPathResolver ).resolveOutputFilePath();

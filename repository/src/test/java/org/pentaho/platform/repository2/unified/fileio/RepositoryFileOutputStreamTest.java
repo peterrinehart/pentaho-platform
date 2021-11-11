@@ -38,13 +38,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.util.reflection.Whitebox.setInternalState;
-import static org.powermock.reflect.Whitebox.getInternalState;
 
 public class RepositoryFileOutputStreamTest {
 
@@ -64,7 +63,8 @@ public class RepositoryFileOutputStreamTest {
   public void testCloseWithEmptyDataWithoutForceFlush() throws IOException {
     RepositoryFileOutputStream repositoryFileOutputStream = spy( new RepositoryFileOutputStream( "1.ktr" ) );
     IUnifiedRepository repository = mock( IUnifiedRepository.class );
-    setInternalState( repositoryFileOutputStream, "repository", repository );
+    doCallRealMethod().when( repositoryFileOutputStream ).setRepository( any( IUnifiedRepository.class ) );
+    repositoryFileOutputStream.setRepository( repository );
     repositoryFileOutputStream.forceFlush( false );
     repositoryFileOutputStream.close();
     assertTrue( repositoryFileOutputStream.flushed );
@@ -81,7 +81,8 @@ public class RepositoryFileOutputStreamTest {
     RepositoryFileOutputStream repositoryFileOutputStream =
       spy( new RepositoryFileOutputStream( "1.ktr", true, true ) );
 
-    setInternalState( repositoryFileOutputStream, "repository", repository );
+    doCallRealMethod().when( repositoryFileOutputStream ).setRepository( any( IUnifiedRepository.class ) );
+    repositoryFileOutputStream.setRepository( repository );
     when( repository.getFile( any() ) ).thenReturn( repositoryFile );
     when(
       repository.createFile( nullable( Serializable.class ), nullable( RepositoryFile.class ), nullable( IRepositoryFileData.class ),
@@ -95,15 +96,6 @@ public class RepositoryFileOutputStreamTest {
         nullable( String.class ) );
   }
 
-  @Test
-  public void testForceFlush() {
-    RepositoryFileOutputStream repositoryFileOutputStream = new RepositoryFileOutputStream( "" );
-    assertTrue( getInternalState( repositoryFileOutputStream, "forceFlush" ) );
-    repositoryFileOutputStream.forceFlush( false );
-    assertFalse( getInternalState( repositoryFileOutputStream, "forceFlush" ) );
-    repositoryFileOutputStream.forceFlush( true );
-    assertTrue( getInternalState( repositoryFileOutputStream, "forceFlush" ) );
-  }
 
   @Test
   public void testStreamCompleteListenerCallback() throws IOException {
@@ -118,7 +110,8 @@ public class RepositoryFileOutputStreamTest {
 
     repositoryFileOutputStream.addListener( streamListener );
 
-    setInternalState( repositoryFileOutputStream, "repository", repository );
+    doCallRealMethod().when( repositoryFileOutputStream ).setRepository( any( IUnifiedRepository.class ) );
+    repositoryFileOutputStream.setRepository( repository );
     when( repository.getFile( any() ) ).thenReturn( repositoryFile );
     when(
       repository.createFile( any( Serializable.class ), any( RepositoryFile.class ), any( IRepositoryFileData.class ),

@@ -14,7 +14,7 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002-2020 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
@@ -26,9 +26,12 @@ import mondrian.xmla.DataSourcesConfig.Catalogs;
 import mondrian.xmla.DataSourcesConfig.DataSource;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.ICacheManager;
+import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFilePermission;
@@ -44,7 +47,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringBufferInputStream;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -54,15 +60,19 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith( MockitoJUnitRunner.class )
 public class MondrianCatalogHelperTest {
 
   private static final String DEFINITION = "mondrian:";
@@ -95,26 +105,14 @@ public class MondrianCatalogHelperTest {
   @Test
   public void testLoadCatalogsIntoCache() {
     setupDsObjects();
-
-    cm = mock( ICacheManager.class );
-    when( cm.cacheEnabled( nullable( String.class ) ) ).thenReturn( true );
-    when( cm.getFromRegionCache( nullable( String.class ), any() ) ).thenReturn( cacheValue );
-
-    //TODO: probably don't need...
-
-//    doAnswer( invocation -> {
-//        cacheValue = invocation.getArguments()[2];
-//        return null;
-//      }
-//    ).when( cm ).putInRegionCache( nullable( String.class ), any(), any() );
+    ICacheManager testCacheManager = new TestICacheManager();
 
     try ( MockedStatic<PentahoSystem> pentahoSystem = mockStatic( PentahoSystem.class ) ) {
-      pentahoSystem.when( () -> PentahoSystem.getCacheManager( any() ) ).thenReturn( cm );
-
+      pentahoSystem.when( () -> PentahoSystem.getCacheManager( any() ) ).thenReturn( testCacheManager );
 
       mch.loadCatalogsIntoCache( dsList, null );
 
-      Object cacheValue = cm.getFromRegionCache( null, null );
+      Object cacheValue = testCacheManager.getFromRegionCache( null, null );
 
       Assert.assertTrue( MondrianCatalogCache.class.isInstance( cacheValue ) );
       Map<?, ?> map = ((MondrianCatalogCache) cacheValue).getCatalogs();
@@ -194,20 +192,9 @@ public class MondrianCatalogHelperTest {
 
   @Test
   public void testGetCatalog() {
-    cm = mock( ICacheManager.class );
-    when( cm.cacheEnabled( nullable( String.class ) ) ).thenReturn( true );
-    when( cm.getFromRegionCache( nullable( String.class ), any() ) ).thenReturn( cacheValue );
-
-    //TODO: probably don't need...
-
-//    doAnswer( invocation -> {
-//        cacheValue = invocation.getArguments()[2];
-//        return null;
-//      }
-//    ).when( cm ).putInRegionCache( nullable( String.class ), any(), any() );
 
     try ( MockedStatic<PentahoSystem> pentahoSystem = mockStatic( PentahoSystem.class ) ) {
-      pentahoSystem.when( () -> PentahoSystem.getCacheManager( any() ) ).thenReturn( cm );
+      pentahoSystem.when( () -> PentahoSystem.getCacheManager( eq( null ) ) ).thenReturn( new TestICacheManager() );
 
       IUnifiedRepository unifiedRepository = mock( IUnifiedRepository.class );
       when( unifiedRepository.getFile( eq( "/etc/mondrian" ) ) ).thenReturn( mockRepositoryFolder );
@@ -216,12 +203,11 @@ public class MondrianCatalogHelperTest {
       when( unifiedRepository.getDataForRead( any(), any() ) ).thenReturn( mockIRepositoryFileData );
       when( unifiedRepository.getChildren( any( Serializable.class ) ) ).thenReturn( singletonList( mockRepositoryFile ) );
 
-      pentahoSystem.when( () -> PentahoSystem.get( any(), any() ) ).thenReturn( unifiedRepository );
+      pentahoSystem.when( () -> PentahoSystem.get( any(), eq( null ) ) ).thenReturn( unifiedRepository );
 
 
       when( mockRepositoryFolder.getId() ).thenReturn( 1 );
       when( mockRepositoryFile.getName() ).thenReturn( "name" );
-      verify( mockRepositoryFile.getName(), times( 2 ) );
       when( mockMetatdataFolder.getId() ).thenReturn( 2 );
       when( mockIRepositoryFileData.getNode() ).thenReturn( metadataNode );
       when( metadataNode.getProperty( eq( "datasourceInfo" ) ) ).thenReturn( new DataProperty( "datasourceInfo", "datasourceInfo", DataNode.DataPropertyType.STRING ) );
@@ -232,6 +218,7 @@ public class MondrianCatalogHelperTest {
 
       MondrianCatalog cat = mch.getCatalog( "name", null );
 
+      verify( mockRepositoryFile, times( 2 ) ).getName();
       assertNotNull( cat );
       assertEquals( "name", cat.getName() );
       assertEquals( "mondrian:/definition", cat.getDefinition() );
@@ -266,6 +253,113 @@ public class MondrianCatalogHelperTest {
         }
       }
       System.out.println( "validateSynchronizedDataSourcesConfig() - Finished" );
+    }
+  }
+
+  class TestICacheManager implements ICacheManager {
+
+    @Override public void cacheStop() {
+
+    }
+
+    @Override public void killSessionCache( IPentahoSession session ) {
+
+    }
+
+    @Override public void killSessionCaches() {
+
+    }
+
+    @Override public void putInSessionCache( IPentahoSession session, String key, Object value ) {
+
+    }
+
+    @Override public void clearCache() {
+
+    }
+
+    @Override public void removeFromSessionCache( IPentahoSession session, String key ) {
+
+    }
+
+    @Override public Object getFromSessionCache( IPentahoSession session, String key ) {
+      return null;
+    }
+
+    @Override public boolean cacheEnabled() {
+      return false;
+    }
+
+    @Override public void putInGlobalCache( Object key, Object value ) {
+
+    }
+
+    @Override public Object getFromGlobalCache( Object key ) {
+      return null;
+    }
+
+    @Override public void removeFromGlobalCache( Object key ) {
+
+    }
+
+    @Override public boolean cacheEnabled( String region ) {
+      return true;
+    }
+
+    @Override public void onLogout( IPentahoSession session ) {
+
+    }
+
+    @Override public boolean addCacheRegion( String region ) {
+      return true;
+    }
+
+    @Override public boolean addCacheRegion( String region, Properties cacheProperties ) {
+      return true;
+    }
+
+    @Override public void clearRegionCache( String region ) {
+
+    }
+
+    @Override public void removeRegionCache( String region ) {
+
+    }
+
+    @Override public void putInRegionCache( String reqion, Object key, Object value ) {
+      cacheValue = value;
+    }
+
+    @Override public Object getFromRegionCache( String region, Object key ) {
+      return cacheValue;
+    }
+
+    @Override public Set getAllEntriesFromRegionCache( String region ) {
+      return null;
+    }
+
+    @Override public Set getAllKeysFromRegionCache( String region ) {
+      return null;
+    }
+
+    @Override public List getAllValuesFromRegionCache( String region ) {
+      return null;
+    }
+
+    @Override public void removeFromRegionCache( String region, Object key ) {
+
+    }
+
+    @Override public long getElementCountInRegionCache( String region ) {
+      return 0;
+    }
+
+    @Override public long getElementCountInSessionCache() {
+      return 0;
+    }
+
+    @Override public long getElementCountInGlobalCache() {
+      return 0;
     }
   }
 
