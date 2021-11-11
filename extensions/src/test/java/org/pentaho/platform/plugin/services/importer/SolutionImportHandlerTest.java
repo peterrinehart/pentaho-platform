@@ -14,7 +14,7 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002-2020 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
@@ -37,16 +37,21 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.pentaho.platform.api.engine.IAuthorizationPolicy;
+import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.security.userroledao.AlreadyExistsException;
 import org.pentaho.platform.api.engine.security.userroledao.IUserRoleDao;
 import org.pentaho.platform.api.mimetype.IMimeType;
 import org.pentaho.platform.api.mt.ITenant;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
+import org.pentaho.platform.api.scheduler2.IScheduler;
 import org.pentaho.platform.api.usersettings.IAnyUserSettingService;
 import org.pentaho.platform.api.usersettings.IUserSettingService;
 import org.pentaho.platform.api.usersettings.pojo.IUserSetting;
+import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.services.importexport.ExportManifestUserSetting;
 import org.pentaho.platform.plugin.services.importexport.ImportSession;
@@ -467,29 +472,24 @@ public class SolutionImportHandlerTest {
     doReturn( response ).when( importHandler )
       .createSchedulerJob( any( SchedulerResource.class ), eq( scheduleRequest ) );
 
-    mockSchedulerPause();
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class );
+          MockedStatic<PentahoSessionHolder> pentahoSessionHolderMockedStatic = Mockito.mockStatic( PentahoSessionHolder.class ) ) {
+      IAuthorizationPolicy iAuthorizationPolicyMock = mock( IAuthorizationPolicy.class );
+      IScheduler iSchedulerMock = mock( IScheduler.class );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IAuthorizationPolicy.class ) ) )
+        .thenReturn( iAuthorizationPolicyMock );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IScheduler.class ), anyString(), eq( null ) ) )
+        .thenReturn( iSchedulerMock );
+      when( iSchedulerMock.getStatus() ).thenReturn( mock( IScheduler.SchedulerStatus.class ) );
+      pentahoSessionHolderMockedStatic.when( PentahoSessionHolder::getSession )
+        .thenReturn( mock( IPentahoSession.class ) );
 
-    importHandler.importSchedules( schedules );
+      importHandler.importSchedules( schedules );
 
-    verify( importHandler )
-      .createSchedulerJob( any( SchedulerResource.class ), eq( scheduleRequest ) );
-    Assert.assertEquals( 1, ImportSession.getSession().getImportedScheduleJobIds().size() );
-  }
-
-  private void mockSchedulerPause() {
-//    SchedulerResource schedulerResource = new SchedulerResource();
-//    new NonStrictExpectations( SchedulerResource.class ) {
-//      {
-//        schedulerResource.pause();
-//        times = 1;
-//
-//        schedulerResource.start();
-//        times = 1;
-//
-//        schedulerResource.getAllJobs();
-//        result = null;
-//      }
-//    };
+      verify( importHandler )
+        .createSchedulerJob( any( SchedulerResource.class ), eq( scheduleRequest ) );
+      Assert.assertEquals( 1, ImportSession.getSession().getImportedScheduleJobIds().size() );
+    }
   }
 
   @Test
@@ -503,10 +503,21 @@ public class SolutionImportHandlerTest {
     doThrow( new IOException( "error creating schedule" ) ).when( importHandler ).createSchedulerJob(
       any( SchedulerResource.class ), eq( scheduleRequest ) );
 
-    mockSchedulerPause();
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class );
+          MockedStatic<PentahoSessionHolder> pentahoSessionHolderMockedStatic = Mockito.mockStatic( PentahoSessionHolder.class ) ) {
+      IAuthorizationPolicy iAuthorizationPolicyMock = mock( IAuthorizationPolicy.class );
+      IScheduler iSchedulerMock = mock( IScheduler.class );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IAuthorizationPolicy.class ) ) )
+        .thenReturn( iAuthorizationPolicyMock );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IScheduler.class ), anyString(), eq( null ) ) )
+        .thenReturn( iSchedulerMock );
+      when( iSchedulerMock.getStatus() ).thenReturn( mock( IScheduler.SchedulerStatus.class ) );
+      pentahoSessionHolderMockedStatic.when( PentahoSessionHolder::getSession )
+        .thenReturn( mock( IPentahoSession.class ) );
 
-    importHandler.importSchedules( schedules );
-    Assert.assertEquals( 0, ImportSession.getSession().getImportedScheduleJobIds().size() );
+      importHandler.importSchedules( schedules );
+      Assert.assertEquals( 0, ImportSession.getSession().getImportedScheduleJobIds().size() );
+    }
   }
 
   @Test
@@ -530,12 +541,20 @@ public class SolutionImportHandlerTest {
     doReturn( response ).when( importHandler ).createSchedulerJob( any( SchedulerResource.class ),
       argThat( goodMatcher ) );
 
-    mockSchedulerPause();
-
-    importHandler.importSchedules( schedules );
-    verify( importHandler, times( 2 ) ).createSchedulerJob(
-      any( SchedulerResource.class ), any( JobScheduleRequest.class ) );
-    Assert.assertEquals( 1, ImportSession.getSession().getImportedScheduleJobIds().size() );
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class );
+    MockedStatic<PentahoSessionHolder> pentahoSessionHolderMockedStatic = Mockito.mockStatic( PentahoSessionHolder.class ) ) {
+      IAuthorizationPolicy iAuthorizationPolicyMock = mock( IAuthorizationPolicy.class );
+      IScheduler iSchedulerMock = mock( IScheduler.class );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IAuthorizationPolicy.class ) ) ).thenReturn( iAuthorizationPolicyMock );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IScheduler.class ), anyString(), eq( null ) ) )
+        .thenReturn( iSchedulerMock );
+      when( iSchedulerMock.getStatus() ).thenReturn( mock( IScheduler.SchedulerStatus.class ) );
+      pentahoSessionHolderMockedStatic.when( PentahoSessionHolder::getSession ).thenReturn( mock( IPentahoSession.class ) );
+      importHandler.importSchedules( schedules );
+      verify( importHandler, times( 2 ) ).createSchedulerJob(
+        any( SchedulerResource.class ), any( JobScheduleRequest.class ) );
+      Assert.assertEquals( 1, ImportSession.getSession().getImportedScheduleJobIds().size() );
+    }
   }
 
   @Test
@@ -561,13 +580,24 @@ public class SolutionImportHandlerTest {
     doReturn( response ).when( importHandler ).createSchedulerJob( nullable( SchedulerResource.class ),
       argThat( goodMatcher ) );
 
-    mockSchedulerPause();
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class );
+          MockedStatic<PentahoSessionHolder> pentahoSessionHolderMockedStatic = Mockito.mockStatic( PentahoSessionHolder.class ) ) {
+      IAuthorizationPolicy iAuthorizationPolicyMock = mock( IAuthorizationPolicy.class );
+      IScheduler iSchedulerMock = mock( IScheduler.class );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IAuthorizationPolicy.class ) ) )
+        .thenReturn( iAuthorizationPolicyMock );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IScheduler.class ), anyString(), eq( null ) ) )
+        .thenReturn( iSchedulerMock );
+      when( iSchedulerMock.getStatus() ).thenReturn( mock( IScheduler.SchedulerStatus.class ) );
+      pentahoSessionHolderMockedStatic.when( PentahoSessionHolder::getSession )
+        .thenReturn( mock( IPentahoSession.class ) );
 
-    importHandler.importSchedules( schedules );
-    verify( importHandler, times( 2 ) )
-      .createSchedulerJob( nullable( SchedulerResource.class ), nullable( JobScheduleRequest.class ) );
-    Assert.assertEquals( 1, ImportSession.getSession().getImportedScheduleJobIds().size() );
-    System.setProperty( "file.separator", sep );
+      importHandler.importSchedules( schedules );
+      verify( importHandler, times( 2 ) )
+        .createSchedulerJob( nullable( SchedulerResource.class ), nullable( JobScheduleRequest.class ) );
+      Assert.assertEquals( 1, ImportSession.getSession().getImportedScheduleJobIds().size() );
+      System.setProperty( "file.separator", sep );
+    }
   }
 
   private class ScheduleRequestMatcher implements ArgumentMatcher<JobScheduleRequest> {
@@ -610,27 +640,27 @@ public class SolutionImportHandlerTest {
     RepositoryFile repoFile = new RepositoryFile.Builder( "FILE_NAME" ).hidden( true ).build();
 
     when( manifestFile.isFileHidden() ).thenReturn( true );
-    Assert.assertTrue( runIsFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
+    Assert.assertTrue( importHandler.isFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
 
     when( manifestFile.isFileHidden() ).thenReturn( false );
-    Assert.assertFalse( runIsFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
+    Assert.assertFalse( importHandler.isFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
 
     when( manifestFile.isFileHidden() ).thenReturn( null );
-    Assert.assertTrue( runIsFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
+    when( solutionHelper.isInHiddenList( "FILE_NAME" ) ).thenReturn( false );
+    Assert.assertTrue( importHandler.isFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
 
     repoFile = new RepositoryFile.Builder( "FILE_NAME" ).hidden( false ).build();
-    Assert.assertFalse( runIsFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
+    Assert.assertFalse( importHandler.isFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
 
     when( solutionHelper.isInHiddenList( "SOURCE_PATH" ) ).thenReturn( true );
-    Assert.assertTrue( runIsFileHidden( null, manifestFile, "SOURCE_PATH" ) );
+    Assert.assertTrue( importHandler.isFileHidden( null, manifestFile, "SOURCE_PATH" ) );
 
     when( solutionHelper.isInHiddenList( "SOURCE_PATH" ) ).thenReturn( false );
     Assert.assertEquals( RepositoryFile.HIDDEN_BY_DEFAULT, runIsFileHidden( null, manifestFile, "SOURCE_PATH" ) );
   }
 
   private Boolean runIsFileHidden( RepositoryFile file, ManifestFile manifestFile, String sourcePath ) {
-//    return Deencapsulation.invoke( importHandler, "isFileHidden", file == null ? RepositoryFile.class : file,
-//        manifestFile, sourcePath );
+
     return null;
   }
 
@@ -640,15 +670,15 @@ public class SolutionImportHandlerTest {
     RepositoryFile repoFile = new RepositoryFile.Builder( "FILE_NAME" ).schedulable( true ).build();
 
     when( manifestFile.isFileSchedulable() ).thenReturn( true );
-    Assert.assertTrue( runIsSchedulable( repoFile, manifestFile ) );
+    Assert.assertTrue( importHandler.isSchedulable( repoFile, manifestFile ) );
 
     when( manifestFile.isFileSchedulable() ).thenReturn( false );
-    Assert.assertFalse( runIsSchedulable( repoFile, manifestFile ) );
+    Assert.assertFalse( importHandler.isSchedulable( repoFile, manifestFile ) );
 
     when( manifestFile.isFileSchedulable() ).thenReturn( null );
-    Assert.assertTrue( runIsSchedulable( repoFile, manifestFile ) );
+    Assert.assertTrue( importHandler.isSchedulable( repoFile, manifestFile ) );
 
-    Assert.assertEquals( RepositoryFile.SCHEDULABLE_BY_DEFAULT, runIsSchedulable( null, manifestFile ) );
+    Assert.assertEquals( RepositoryFile.SCHEDULABLE_BY_DEFAULT, importHandler.isSchedulable( null, manifestFile ) );
   }
 
   @Test
@@ -667,12 +697,6 @@ public class SolutionImportHandlerTest {
     Assert.assertFalse( importHandler.fileIsScheduleInputSource( manifest, "/public/file" ) );
     Assert.assertTrue( importHandler.fileIsScheduleInputSource( manifest, "/public/test/file3" ) );
     Assert.assertTrue( importHandler.fileIsScheduleInputSource( manifest, "public/test/file3" ) );
-  }
-
-  private Boolean runIsSchedulable( RepositoryFile file, ManifestFile manifestFile ) {
-//    return Deencapsulation.invoke( importHandler, "isSchedulable", file == null ? RepositoryFile.class : file,
-//        manifestFile );
-    return null;
   }
 
   @After

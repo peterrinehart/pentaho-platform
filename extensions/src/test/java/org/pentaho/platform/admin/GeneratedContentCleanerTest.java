@@ -14,16 +14,18 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002-2020 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
 package org.pentaho.platform.admin;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
@@ -42,6 +44,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,13 +70,18 @@ public class GeneratedContentCleanerTest {
     generatedContentCleaner.setAge( 1000 );
   }
 
+  @After
+  public void cleanup() {
+    Mockito.validateMockitoUsage();
+  }
+
   @Test
   public void testExecute_noFilesToDelete() throws Exception {
     final Date fixedDate = new SimpleDateFormat( "d/m/yyyy" ).parse( "1/1/2015" );
     RepositoryFile file =
       new RepositoryFile.Builder( DEFAULT_STRING, FILE_ID ).folder( false ).createdDate( fixedDate ).build();
     RepositoryFileTree tree = new RepositoryFileTree( file, null );
-    when( repo.getTree( nullable( String.class ), eq( -1 ), nullable( String.class ), eq( true ) ) ).thenReturn( tree );
+    lenient().when( repo.getTree( nullable( String.class ), eq( -1 ), nullable( String.class ), eq( true ) ) ).thenReturn( tree );
 
     generatedContentCleaner.execute();
     verify( repo, never() ).deleteFile( any( Serializable.class ), eq( true ), nullable( String.class ) );
