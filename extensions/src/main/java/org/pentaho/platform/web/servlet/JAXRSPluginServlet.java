@@ -20,6 +20,7 @@
 
 package org.pentaho.platform.web.servlet;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.spi.container.WebApplication;
 import com.sun.jersey.spi.container.servlet.WebConfig;
@@ -119,7 +120,7 @@ public class JAXRSPluginServlet extends SpringServlet implements ApplicationCont
         requestThread.set( originalRequest.getRequestURI().toString() );
       }
     }
-    super.service( request, response );
+    callParentServiceMethod( request, response );
 
     // JAX-RS Response return objects do not trigger the "error state" in the HttpServletResponse
     // Forcing all HTTP Error Status into "sendError" enables the configuration of custom error
@@ -127,6 +128,13 @@ public class JAXRSPluginServlet extends SpringServlet implements ApplicationCont
     if ( !response.isCommitted() && response.getStatus() > UNDER_KNOWN_ERROR_RANGE && response.getStatus() < OVER_KNOWN_ERROR_RANGE ) {
       response.sendError( response.getStatus() );
     }
+  }
+
+  // wrapped in its own method for easier stubbing
+  @VisibleForTesting
+  protected void callParentServiceMethod( HttpServletRequest request, HttpServletResponse response )
+    throws ServletException, IOException {
+    super.service( request, response );
   }
 
   @Override

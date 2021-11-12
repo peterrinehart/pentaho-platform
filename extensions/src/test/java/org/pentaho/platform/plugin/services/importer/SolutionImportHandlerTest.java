@@ -20,22 +20,12 @@
 
 package org.pentaho.platform.plugin.services.importer;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -44,6 +34,7 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.security.userroledao.AlreadyExistsException;
 import org.pentaho.platform.api.engine.security.userroledao.IUserRoleDao;
 import org.pentaho.platform.api.mimetype.IMimeType;
+import org.pentaho.platform.api.mimetype.IPlatformMimeResolver;
 import org.pentaho.platform.api.mt.ITenant;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
@@ -66,7 +57,27 @@ import org.pentaho.platform.security.policy.rolebased.IRoleAuthorizationPolicyRo
 import org.pentaho.platform.web.http.api.resources.JobScheduleRequest;
 import org.pentaho.platform.web.http.api.resources.SchedulerResource;
 
-import static org.mockito.Mockito.*;
+import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 public class SolutionImportHandlerTest {
@@ -77,6 +88,7 @@ public class SolutionImportHandlerTest {
   private IUnifiedRepository repository;
   private IRoleAuthorizationPolicyRoleBindingDao roleAuthorizationPolicyRoleBindingDao;
   private SolutionFileImportHelper solutionHelper;
+  private IPlatformMimeResolver mockMimeResolver;
 
   @Before
   public void setUp() throws Exception {
@@ -85,13 +97,17 @@ public class SolutionImportHandlerTest {
     roleAuthorizationPolicyRoleBindingDao = mockToPentahoSystem( IRoleAuthorizationPolicyRoleBindingDao.class );
 
     List<IMimeType> mimeTypes = new ArrayList<>();
-    importHandler = spy( new SolutionImportHandler( mimeTypes ) );
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class ) ) {
+      mockMimeResolver = mock( IPlatformMimeResolver.class );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( IPlatformMimeResolver.class ) )
+        .thenReturn( mockMimeResolver );
+      importHandler = spy( new SolutionImportHandler( mimeTypes ) );
+    }
 
     when( importHandler.getImportSession() ).thenReturn( mock( ImportSession.class));
     when( importHandler.getLogger() ).thenReturn( mock( Log.class));
 
     solutionHelper = mock( SolutionFileImportHelper.class );
-   // Deencapsulation.setField( importHandler, "solutionHelper", solutionHelper );
   }
 
   private <T> T mockToPentahoSystem( Class<T> cl ) {
@@ -636,6 +652,10 @@ public class SolutionImportHandlerTest {
 
   @Test
   public void testIsFileHidden() {
+    IMimeType hiddenMime = mock( IMimeType.class );
+    IMimeType visibleMime = mock( IMimeType.class );
+    when( hiddenMime.isHidden() ).thenReturn( true );
+    when( visibleMime.isHidden() ).thenReturn( false );
     ManifestFile manifestFile = mock( ManifestFile.class );
     RepositoryFile repoFile = new RepositoryFile.Builder( "FILE_NAME" ).hidden( true ).build();
 
@@ -646,22 +666,17 @@ public class SolutionImportHandlerTest {
     Assert.assertFalse( importHandler.isFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
 
     when( manifestFile.isFileHidden() ).thenReturn( null );
-    when( solutionHelper.isInHiddenList( "FILE_NAME" ) ).thenReturn( false );
+    //when( mockMimeResolver.resolveMimeTypeForFileName( "FILE_NAME" ) ).thenReturn( visibleMime );
     Assert.assertTrue( importHandler.isFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
 
     repoFile = new RepositoryFile.Builder( "FILE_NAME" ).hidden( false ).build();
     Assert.assertFalse( importHandler.isFileHidden( repoFile, manifestFile, "SOURCE_PATH" ) );
 
-    when( solutionHelper.isInHiddenList( "SOURCE_PATH" ) ).thenReturn( true );
+    when( mockMimeResolver.resolveMimeTypeForFileName( "SOURCE_PATH" ) ).thenReturn( hiddenMime );
     Assert.assertTrue( importHandler.isFileHidden( null, manifestFile, "SOURCE_PATH" ) );
 
-    when( solutionHelper.isInHiddenList( "SOURCE_PATH" ) ).thenReturn( false );
-    Assert.assertEquals( RepositoryFile.HIDDEN_BY_DEFAULT, runIsFileHidden( null, manifestFile, "SOURCE_PATH" ) );
-  }
-
-  private Boolean runIsFileHidden( RepositoryFile file, ManifestFile manifestFile, String sourcePath ) {
-
-    return null;
+    when( mockMimeResolver.resolveMimeTypeForFileName( "SOURCE_PATH" ) ).thenReturn( visibleMime );
+    Assert.assertEquals( RepositoryFile.HIDDEN_BY_DEFAULT, importHandler.isFileHidden( null, manifestFile, "SOURCE_PATH" ) );
   }
 
   @Test

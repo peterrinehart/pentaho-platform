@@ -27,11 +27,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.IAuthorizationPolicy;
 import org.pentaho.platform.api.engine.IContentGenerator;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.PentahoAccessControlException;
-import org.pentaho.platform.api.engine.security.userroledao.IUserRoleDao;
 import org.pentaho.platform.api.repository2.unified.IRepositoryContentConverterHandler;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
@@ -46,7 +46,6 @@ import org.pentaho.platform.core.mt.Tenant;
 import org.pentaho.platform.engine.core.output.SimpleOutputHandler;
 import org.pentaho.platform.engine.core.solution.SimpleParameterProvider;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
-import org.pentaho.platform.engine.core.system.TenantUtils;
 import org.pentaho.platform.plugin.services.importexport.Exporter;
 import org.pentaho.platform.plugin.services.importexport.StreamConverter;
 import org.pentaho.platform.repository2.unified.fileio.RepositoryFileOutputStream;
@@ -55,11 +54,6 @@ import org.pentaho.platform.security.policy.rolebased.actions.PublishAction;
 import org.pentaho.platform.web.http.api.resources.services.FileService;
 import org.pentaho.platform.web.http.api.resources.utils.FileUtils;
 import org.pentaho.platform.web.http.messages.Messages;
-import org.pentaho.test.mock.MockPentahoRole;
-import org.pentaho.test.mock.MockPentahoUser;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -93,8 +87,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -105,20 +99,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pentaho.platform.web.http.api.resources.FileResource.REPOSITORY_ADMIN_USERNAME;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( { TenantUtils.class, FileResource.class } )
+@RunWith( MockitoJUnitRunner.class )
 public class FileResourceTest {
   private static final String ACL_OWNER = "ACL_Owner";
-  private static final String BAD_ACL_OWNER = "<script>alert('999');</script>";
 
   private static final String USERNAME = "admin";
-  private static final String BAD_USERNAME = "cowboy";
 
   private static final String ROLENAME = "Administrators";
-  private static final String BAD_ROLENAME = "Outlaws";
 
   private static final String XML_EXTENSION = "xml";
   private static final String PATH_CONTROL_CHARACTER = "Create Control Character \u0017 File.xml";
@@ -127,21 +115,15 @@ public class FileResourceTest {
   private static final String PATH_ID = "pathId.xml";
   private static final String PATH_ID_WITHOUTH_EXTENSION = "pathId";
   private static final String PATH_ID_INCORRECT_EXTENSION = "pathId.wrong";
-  private static final String NAME_NEW_FILE = "nameNewFile.xml";
   private static final String NAME_NEW_FILE_WITHOUT_EXTENSION = "nameNewFile";
-  private static final String NAME_NEW_FILE_WRONG_EXTENSION = "nameNewFile.wrong";
 
   private static final String FILE_ID = "444324fd54ghad";
   private FileResource fileResource;
-  private IUserRoleDao userRoleDao;
   private Tenant tenant;
 
   @Before
   public void setUp() {
-    mockStatic( TenantUtils.class );
-
     tenant = new Tenant( "hitachivantara", true );
-    when( TenantUtils.getCurrentTenant() ).thenReturn( tenant );
 
     fileResource = spy( FileResource.class );
     fileResource.fileService = mock( FileService.class );
@@ -149,17 +131,6 @@ public class FileResourceTest {
     fileResource.policy = mock( IAuthorizationPolicy.class );
     fileResource.repository = mock( IUnifiedRepository.class );
     fileResource.repoWs = mock( DefaultUnifiedRepositoryWebService.class );
-
-    userRoleDao = mock( IUserRoleDao.class );
-    PentahoSystem.registerObject( userRoleDao );
-
-    when( userRoleDao.getUser( tenant, BAD_ACL_OWNER ) ).thenReturn( null );
-    when( userRoleDao.getUser( tenant, BAD_USERNAME ) ).thenReturn( null );
-    when( userRoleDao.getUser( tenant, ACL_OWNER ) ).thenReturn( new MockPentahoUser() );
-    when( userRoleDao.getUser( tenant, USERNAME ) ).thenReturn( new MockPentahoUser() );
-
-    when( userRoleDao.getRole( tenant, BAD_ROLENAME ) ).thenReturn( null );
-    when( userRoleDao.getRole( tenant, ROLENAME ) ).thenReturn( new MockPentahoRole() );
   }
 
   @After
@@ -443,7 +414,6 @@ public class FileResourceTest {
 
   @Test
   public void testdoCreateDirSafe_Forbidden_ControlCharactersFound() throws Exception {
-    doReturn( new StringBuffer() ).when( fileResource.fileService ).doGetReservedChars();
     doCallRealMethod().when( fileResource.fileService )
       .doCreateDirSafe( PATH_CONTROL_CHARACTER );
     doCallRealMethod().when( fileResource.fileService )
@@ -648,23 +618,6 @@ public class FileResourceTest {
     verify( fileResource, times( 1 ) ).getFileInputStream( mockFile );
     verify( fileResource, times( 1 ) ).getStreamingOutput( mockInputStream );
     verify( fileResource, times( 1 ) ).buildOkResponse( mockOutput, FileResource.APPLICATION_ZIP );
-  }
-
-  @Test
-  public void testDoGetDirAsZipWithFileError() {
-    RepositoryFile mockRepositoryFile = mock( RepositoryFile.class );
-
-    String path = "path";
-    doReturn( path ).when( mockRepositoryFile ).getPath();
-
-    Exception mockException = mock( RuntimeException.class );
-    doThrow( mockException ).when( fileResource ).getExporter();
-
-    String exceptionToString = "exception";
-    doReturn( exceptionToString ).when( mockException ).toString();
-
-    Response mockServerErrorResponse = mock( Response.class );
-    doReturn( mockServerErrorResponse ).when( fileResource ).buildServerErrorResponse( exceptionToString );
   }
 
   @Test
@@ -1521,7 +1474,6 @@ public class FileResourceTest {
   public void testDoRename_Forbidden_ControlCharactersFound() throws Exception {
 
     String charsetName = "charsetName";
-    doReturn( charsetName ).when( fileResource.httpServletRequest ).getCharacterEncoding();
 
     Response testResponse = fileResource.doRename( PATH_ID, PATH_CONTROL_CHARACTER );
     assertEquals( FORBIDDEN.getStatusCode(), testResponse.getStatus() );
@@ -1694,7 +1646,6 @@ public class FileResourceTest {
 
     RepositoryFileAclAceDto recipient = mock( RepositoryFileAclAceDto.class );
     doReturn( ROLENAME ).when( recipient ).getRecipient();
-    doReturn( 1 ).when( recipient ).getRecipientType();
 
     acl.setAces( Arrays.asList( new RepositoryFileAclAceDto[] { recipient } ), false );
 
@@ -1708,7 +1659,6 @@ public class FileResourceTest {
 
     RepositoryFileAclAceDto recipient = mock( RepositoryFileAclAceDto.class );
     doReturn( USERNAME ).when( recipient ).getRecipient();
-    doReturn( 0 ).when( recipient ).getRecipientType();
 
     acl.setAces( Arrays.asList( new RepositoryFileAclAceDto[] { recipient } ), false );
 

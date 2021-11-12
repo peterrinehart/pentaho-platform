@@ -20,7 +20,6 @@
 
 package org.pentaho.platform.web.servlet;
 
-import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -28,11 +27,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -52,8 +49,7 @@ public class JAXRSPluginServletTest {
     when( request.getPathInfo() ).thenReturn( "/url" );
     when( response.getStatus() ).thenReturn( httpStatusCode );
 
-    //TODO: this isn't working for two of the tests. Probably reach out to Andre Rua who wrote the test to see if he can rewrite
-    doCallRealMethod().when( (SpringServlet) servlet ).service( any(), any()  );
+    doNothing().when( servlet ).callParentServiceMethod( any( HttpServletRequest.class ), any( HttpServletResponse.class ) );
 
 
     servlet.service( request, response );
@@ -74,8 +70,7 @@ public class JAXRSPluginServletTest {
     when( response.getStatus() ).thenReturn( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
     when( response.isCommitted() ).thenReturn( isCommitted );
 
-    //TODO: this isn't working for two of the tests. Probably reach out to Andre Rua who wrote the test to see if he can rewrite
-    doNothing().when( (SpringServlet) servlet ).service( any(), any() );
+    doNothing().when( servlet ).callParentServiceMethod( any( HttpServletRequest.class ), any( HttpServletResponse.class ) );
 
     servlet.service( request, response );
 

@@ -42,10 +42,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.pentaho.platform.engine.core.output.MultiOutputStream;
 import org.pentaho.platform.plugin.services.importexport.CommandLineProcessor.RequestType;
-//
-//import mockit.Deencapsulation;
-//import mockit.Mock;
-//import mockit.MockUp;
+
 
 @FixMethodOrder( MethodSorters.NAME_ASCENDING )
 public class CommandLineProcessorTest extends Assert {
