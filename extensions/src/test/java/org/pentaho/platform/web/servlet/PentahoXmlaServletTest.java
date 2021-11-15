@@ -14,14 +14,12 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002-2018 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.
  *
  */
 
 package org.pentaho.platform.web.servlet;
 
-import junit.framework.TestCase;
-import mondrian.olap.Connection;
 import mondrian.olap.DriverManager;
 import mondrian.olap.MondrianException;
 import mondrian.rolap.RolapConnection;
@@ -30,6 +28,9 @@ import org.dom4j.Document;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.ISecurityHelper;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.security.SecurityHelper;
@@ -38,10 +39,7 @@ import org.pentaho.platform.plugin.action.mondrian.catalog.IMondrianCatalogServi
 import org.pentaho.platform.plugin.action.mondrian.catalog.MondrianCatalog;
 import org.pentaho.platform.plugin.action.mondrian.catalog.MondrianCatalogHelper;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+//import org.powermock.api.mockito.PowerMockito;
 
 import javax.servlet.ServletConfig;
 import java.util.Properties;
@@ -53,11 +51,14 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(DriverManager.class)
-@PowerMockIgnore( { "javax.management.*", "jdk.internal.reflect.*" } )
+@RunWith( MockitoJUnitRunner.class)
 public class PentahoXmlaServletTest  {
 
   private static final String DATASOURCE_XML =
@@ -170,34 +171,34 @@ public class PentahoXmlaServletTest  {
 
 
     doReturn( mondrianCatalog ).when( catalogService ).getCatalog(  nullable( String.class ), any() );
-    PowerMockito.mockStatic(DriverManager.class);
+    try ( MockedStatic<DriverManager> driverManagerMockedStatic = Mockito.mockStatic( DriverManager.class ) ) {
 
-    when(DriverManager.getConnection(nullable( String.class ), any())).thenReturn( mock( RolapConnection.class ));
+      driverManagerMockedStatic.when( () -> DriverManager.getConnection( nullable( String.class ), any() ) ).thenReturn(
+        mock( RolapConnection.class ) );
 
+      PentahoSystem.registerObject( catalogService );
 
-    PentahoSystem.registerObject( catalogService );
+      PentahoXmlaServlet xmlaServlet = spy( new PentahoXmlaServlet() );
 
-    PentahoXmlaServlet xmlaServlet = spy( new PentahoXmlaServlet() );
-
-    XmlaHandler.ConnectionFactory connectionFactory =
+      XmlaHandler.ConnectionFactory connectionFactory =
         xmlaServlet.createConnectionFactory( mock( ServletConfig.class ) );
 
-    Properties properties = new Properties();
-    properties.put("DataSource", "bogus");
-    try {
-      connectionFactory.getConnection( "SampleData", "SampleData", "baz", properties );
-    } catch( MondrianException exception ){
-      //ignored
+      Properties properties = new Properties();
+      properties.put( "DataSource", "bogus" );
+      try {
+        connectionFactory.getConnection( "SampleData", "SampleData", "baz", properties );
+      } catch ( MondrianException exception ) {
+        //ignored
+      }
+
+      try {
+        connectionFactory.getConnection( "SampleData", "SampleData", "baz", properties );
+      } catch ( MondrianException exception ) {
+        //ignored
+      }
+
+      // We verify that only one Catalog Locator is created for multiple requests
+      verify( xmlaServlet, times( 1 ) ).makeCatalogLocator( any() );
     }
-
-    try {
-      connectionFactory.getConnection( "SampleData", "SampleData", "baz", properties );
-    } catch( MondrianException exception ){
-      //ignored
-    }
-
-    // We verify that only one Catalog Locator is created for multiple requests
-    verify( xmlaServlet, times(1) ).makeCatalogLocator( any() );
-
   }
 }

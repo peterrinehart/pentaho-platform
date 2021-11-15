@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.platform.api.engine.IAuthorizationPolicy;
 import org.pentaho.platform.api.engine.IPentahoObjectFactory;
@@ -40,9 +41,6 @@ import org.pentaho.platform.security.policy.rolebased.actions.AdministerSecurity
 import org.pentaho.platform.security.policy.rolebased.actions.PublishAction;
 import org.pentaho.platform.security.policy.rolebased.actions.RepositoryCreateAction;
 import org.pentaho.platform.security.policy.rolebased.actions.RepositoryReadAction;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -53,9 +51,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( FileUtils.class )
+@RunWith( MockitoJUnitRunner.class )
 public class SystemUtilsTest {
 
 
@@ -158,7 +154,6 @@ public class SystemUtilsTest {
 
     // Test 3: user loses administer security, but has publish action, should grant access
     doReturn( false ).when( mockAuthPolicy ).isAllowed( AdministerSecurityAction.NAME );
-    doReturn( true ).when( mockAuthPolicy ).isAllowed( PublishAction.NAME );
     assertFalse( SystemUtils.canDownload( "/mock/path" ) );
 
     // Test 4: user loses administer security, neither does it have publish content, but on ome folder, should grant access

@@ -20,23 +20,18 @@
 
 package org.pentaho.platform.plugin.services.importer;
 
-import static org.mockito.Mockito.*;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.platform.api.engine.IPentahoObjectFactory;
 import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.api.engine.ObjectFactoryException;
 import org.pentaho.platform.api.mimetype.IMimeType;
 import org.pentaho.platform.api.mimetype.IPlatformMimeResolver;
 import org.pentaho.platform.api.repository2.unified.IPlatformImportBundle;
@@ -47,14 +42,23 @@ import org.pentaho.platform.repository2.unified.webservices.DefaultUnifiedReposi
 import org.pentaho.platform.web.http.api.resources.services.FileService;
 import org.pentaho.reporting.libraries.docbundle.DocumentMetaData;
 import org.pentaho.reporting.libraries.docbundle.ODFMetaAttributeNames;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( { DefaultUnifiedRepositoryWebService.class, FileService.class } )
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@RunWith( MockitoJUnitRunner.class )
 public class PRPTImportHandlerTest {
 
   private static final String SAMPLE_USER_PATH = "/home/user/";
@@ -74,29 +78,11 @@ public class PRPTImportHandlerTest {
   private PRPTImportHandler handler;
 
   private static final IPlatformImporter importer = mock( IPlatformImporter.class );
+  @Mock private IUnifiedRepository mockRepository;
+  @Mock private IPlatformMimeResolver resolver;
 
   @Before
   public void setUp() throws Exception {
-    final IPlatformMimeResolver resolver = mock( IPlatformMimeResolver.class );
-
-    pentahoObjectFactory = mock( IPentahoObjectFactory.class );
-    when( pentahoObjectFactory.objectDefined( nullable( String.class ) ) ).thenReturn( true );
-    when( pentahoObjectFactory.get( eq( IPlatformMimeResolver.class ), nullable( String.class ), any( IPentahoSession.class ) ) )
-        .thenAnswer( new Answer<Object>() {
-          @Override
-          public Object answer( InvocationOnMock invocation ) throws Throwable {
-            return resolver;
-          }
-        } );
-    when( pentahoObjectFactory.get( eq( IPlatformImporter.class ), nullable( String.class ), any( IPentahoSession.class ) ) )
-      .thenAnswer( new Answer<Object>() {
-        @Override
-        public Object answer( InvocationOnMock invocation ) throws Throwable {
-          return importer;
-        }
-      } );
-    PentahoSystem.registerObjectFactory( pentahoObjectFactory );
-
     InputStream stream = new ByteArrayInputStream( SAMPLE_STREAM.getBytes() );
     bundle = mock( RepositoryFileImportBundle.class );
     when( bundle.getName() ).thenReturn( SAMPLE_NAME );
@@ -111,79 +97,113 @@ public class PRPTImportHandlerTest {
     handler = spy( new PRPTImportHandler( mimeTypes ) );
     doReturn( session ).when( handler ).getImportSession();
     handler.setRepository( repository );
-
-    FileService fileService = spy( FileService.class );
-    DefaultUnifiedRepositoryWebService repoWs = mock( DefaultUnifiedRepositoryWebService.class );
-    PowerMockito.whenNew( DefaultUnifiedRepositoryWebService.class ).withNoArguments().thenReturn( repoWs );
-    PowerMockito.whenNew( FileService.class ).withNoArguments().thenReturn( fileService );
   }
 
   @Test
   public void testImportFile_validPath() throws Exception {
-    when( bundle.getPath() ).thenReturn( SAMPLE_USER_PATH );
-    DocumentMetaData metadata = mock( DocumentMetaData.class );
-    doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
-    handler.importFile( bundle );
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class ) ) {
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IUnifiedRepository.class ) ) ).thenReturn( mockRepository );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IPlatformMimeResolver.class ) ) ).thenReturn( resolver );
+      when( bundle.getPath() ).thenReturn( SAMPLE_USER_PATH );
+      DocumentMetaData metadata = mock( DocumentMetaData.class );
+      doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
+      handler.importFile( bundle );
+    }
   }
 
   @Test
   public void testImportFile_slashPath() throws Exception {
-    when( bundle.getPath() ).thenReturn( SAMPLE_SLASH_PATH );
-    DocumentMetaData metadata = mock( DocumentMetaData.class );
-    doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
-    handler.importFile( bundle );
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class ) ) {
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IUnifiedRepository.class ) ) )
+        .thenReturn( mockRepository );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IPlatformMimeResolver.class ) ) ).thenReturn( resolver );
+      when( bundle.getPath() ).thenReturn( SAMPLE_SLASH_PATH );
+      DocumentMetaData metadata = mock( DocumentMetaData.class );
+      doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
+      handler.importFile( bundle );
+    }
   }
 
   @Test
   public void testImportFile_backSlashPath() throws Exception {
-    when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
-    DocumentMetaData metadata = mock( DocumentMetaData.class );
-    doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
-    handler.importFile( bundle );
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class ) ) {
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IUnifiedRepository.class ) ) )
+        .thenReturn( mockRepository );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IPlatformMimeResolver.class ) ) ).thenReturn( resolver );
+      when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
+      DocumentMetaData metadata = mock( DocumentMetaData.class );
+      doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
+      handler.importFile( bundle );
+    }
   }
 
   //we should import file if we have description
   @Test
   public void testImportFile_metadataReturnOnlyDescription() throws Exception {
-    when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
-    DocumentMetaData metadata = mock( DocumentMetaData.class );
-    when( metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.DESCRIPTION ) ) )
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class ) ) {
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IUnifiedRepository.class ) ) )
+        .thenReturn( mockRepository );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IPlatformMimeResolver.class ) ) ).thenReturn( resolver );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IPlatformImporter.class ) ) ).thenReturn( importer );
+      when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
+      DocumentMetaData metadata = mock( DocumentMetaData.class );
+      when(
+        metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.DESCRIPTION ) ) )
         .thenReturn( ODFMetaAttributeNames.DublinCore.DESCRIPTION );
-    doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
-    handler.importFile( bundle );
-    verify( importer, atLeastOnce() ).importFile( any( IPlatformImportBundle.class ) );
+      doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
+      handler.importFile( bundle );
+      verify( importer, atLeastOnce() ).importFile( any( IPlatformImportBundle.class ) );
+    }
   }
 
   //we should import file if we have title
   @Test
   public void testImportFile_metadataReturnOnlyTitle() throws Exception {
-    when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
-    DocumentMetaData metadata = mock( DocumentMetaData.class );
-    when( metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.TITLE ) ) )
-      .thenReturn( ODFMetaAttributeNames.DublinCore.TITLE );
-    doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
-    handler.importFile( bundle );
-    verify( importer, atLeastOnce() ).importFile( any( IPlatformImportBundle.class ) );
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class ) ) {
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IUnifiedRepository.class ) ) )
+        .thenReturn( mockRepository );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IPlatformMimeResolver.class ) ) ).thenReturn( resolver );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IPlatformImporter.class ) ) ).thenReturn( importer );
+      when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
+      DocumentMetaData metadata = mock( DocumentMetaData.class );
+      when( metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.TITLE ) ) )
+        .thenReturn( ODFMetaAttributeNames.DublinCore.TITLE );
+      doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
+      handler.importFile( bundle );
+      verify( importer, atLeastOnce() ).importFile( any( IPlatformImportBundle.class ) );
+    }
   }
 
   //we should import file if we have description and title
   @Test
   public void testImportFile_metadataIsCorrect() throws Exception {
-    when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
-    DocumentMetaData metadata = mock( DocumentMetaData.class );
-    when( metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.DESCRIPTION ) ) )
-      .thenReturn( ODFMetaAttributeNames.DublinCore.DESCRIPTION );
-    when( metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.TITLE ) ) )
-      .thenReturn( ODFMetaAttributeNames.DublinCore.TITLE );
-    doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
-    handler.importFile( bundle );
-    verify( importer, atLeastOnce() ).importFile( any( IPlatformImportBundle.class ) );
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class ) ) {
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IUnifiedRepository.class ) ) )
+        .thenReturn( mockRepository );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IPlatformMimeResolver.class ) ) ).thenReturn( resolver );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IPlatformImporter.class ) ) ).thenReturn( importer );
+      when( bundle.getPath() ).thenReturn( SAMPLE_BACKSLASH_PATH );
+      DocumentMetaData metadata = mock( DocumentMetaData.class );
+      when(
+        metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.DESCRIPTION ) ) )
+        .thenReturn( ODFMetaAttributeNames.DublinCore.DESCRIPTION );
+      when( metadata.getBundleAttribute( nullable( String.class ), eq( ODFMetaAttributeNames.DublinCore.TITLE ) ) )
+        .thenReturn( ODFMetaAttributeNames.DublinCore.TITLE );
+      doReturn( metadata ).when( handler ).extractMetaData( any( byte[].class ) );
+      handler.importFile( bundle );
+      verify( importer, atLeastOnce() ).importFile( any( IPlatformImportBundle.class ) );
+    }
   }
 
   @Test( expected = PlatformImportException.class )
   public void testImportFile_ErrorRecivingMetadata() throws Exception {
-    when( bundle.getPath() ).thenReturn( SAMPLE_USER_PATH );
-    handler.importFile( bundle );
+    try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class ) ) {
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IUnifiedRepository.class ) ) )
+        .thenReturn( mockRepository );
+      pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IPlatformMimeResolver.class ) ) ).thenReturn( resolver );
+      when( bundle.getPath() ).thenReturn( SAMPLE_USER_PATH );
+      handler.importFile( bundle );
+    }
   }
 
 }

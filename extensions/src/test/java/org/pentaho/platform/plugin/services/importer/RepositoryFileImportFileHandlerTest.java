@@ -23,6 +23,9 @@ package org.pentaho.platform.plugin.services.importer;
 import org.apache.commons.logging.Log;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.mimetype.IMimeType;
 import org.pentaho.platform.api.repository2.unified.Converter;
 import org.pentaho.platform.api.repository2.unified.IRepositoryDefaultAclHandler;
@@ -33,6 +36,7 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFileAcl;
 import org.pentaho.platform.api.repository2.unified.RepositoryFilePermission;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileSid;
 import org.pentaho.platform.core.mimetype.MimeType;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.services.importexport.ImportSession;
 import org.pentaho.platform.plugin.services.importexport.Log4JRepositoryImportLogger;
 import org.pentaho.platform.plugin.services.importexport.exportManifest.ExportManifest;
@@ -41,10 +45,6 @@ import org.pentaho.platform.security.userroledao.DefaultTenantedPrincipleNameRes
 import org.pentaho.platform.web.http.api.resources.services.FileService;
 import org.pentaho.test.platform.repository2.unified.MockUnifiedRepository;
 import org.pentaho.test.platform.repository2.unified.MockUnifiedRepository.ICurrentUserProvider;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -57,6 +57,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -66,9 +67,7 @@ import static org.mockito.Mockito.when;
  * @author tkafalas
  *
  */
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( { DefaultUnifiedRepositoryWebService.class, FileService.class } )
+@RunWith( MockitoJUnitRunner.class )
 public class RepositoryFileImportFileHandlerTest {
   private static final String USER_NAME = "__root__"; // The mock unified repository gives this user full access
   private static final String USER_NAME2 = "mickeyMouse"; // Used with acls
@@ -442,8 +441,6 @@ public class RepositoryFileImportFileHandlerTest {
 
     FileService fileService = spy( FileService.class );
     DefaultUnifiedRepositoryWebService repoWs = mock( DefaultUnifiedRepositoryWebService.class );
-    PowerMockito.whenNew( DefaultUnifiedRepositoryWebService.class ).withNoArguments().thenReturn( repoWs );
-    PowerMockito.whenNew( FileService.class ).withNoArguments().thenReturn( fileService );
 
     fileHandler.setRepository( mockRepository );
     fileHandler.setDefaultAclHandler( new DefaultAclHandler() );
@@ -524,8 +521,11 @@ public class RepositoryFileImportFileHandlerTest {
       importSession.setApplyAclSettings( applyAclSettings );
       importSession.setOverwriteAclSettings( overwriteAclSettings );
       importSession.setRetainOwnership( setRetainOwnership );
-
-      fileHandler.importFile( mockBundle );
+      try ( MockedStatic<PentahoSystem> pentahoSystemMockedStatic = Mockito.mockStatic( PentahoSystem.class ) ) {
+        pentahoSystemMockedStatic.when( () -> PentahoSystem.get( eq( IUnifiedRepository.class ) ) )
+          .thenReturn( mockRepository );
+        fileHandler.importFile( mockBundle );
+      }
     }
   }
 

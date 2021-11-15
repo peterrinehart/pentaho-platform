@@ -21,32 +21,31 @@
 package org.pentaho.platform.plugin.services.importer;
 
 import junit.framework.Assert;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
-import org.mockito.internal.verification.VerificationModeFactory;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.repository2.unified.IPlatformImportBundle;
 import org.pentaho.platform.plugin.services.importexport.IRepositoryImportLogger;
 import org.pentaho.platform.plugin.services.importexport.ImportSession;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pentaho.platform.plugin.services.importer.ArchiveLoader.ZIPS_FILTER;
@@ -54,9 +53,7 @@ import static org.pentaho.platform.plugin.services.importer.ArchiveLoader.ZIPS_F
 /**
  * Created with IntelliJ IDEA. User: kwalker Date: 6/20/13 Time: 12:37 PM
  */
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest(ImportSession.class)
+@RunWith( MockitoJUnitRunner.class)
 public class ArchiveLoaderTest {
 
   private static final Date LOAD_STAMP = new Date( 123456789 );
@@ -78,8 +75,6 @@ public class ArchiveLoaderTest {
     when( reports.getName() ).thenReturn( reportsName );
     when( reports.getPath() ).thenReturn( "/root/path/" + reportsName );
     when( directory.listFiles( ZIPS_FILTER ) ).thenReturn( new File[] { jobs, reports } );
-    IRepositoryImportLogger logger = mock( IRepositoryImportLogger.class );
-    when( importer.getRepositoryImportLogger() ).thenReturn( logger );
     loader.loadAll( directory, ZIPS_FILTER );
     verify( importer ).importFile( argThat( bundleMatcher( jobsName, inputStream ) ) );
     verify( jobs ).renameTo( argThat( fileMatcher( jobs ) ) );
@@ -104,8 +99,6 @@ public class ArchiveLoaderTest {
     when( directory.listFiles( ZIPS_FILTER ) ).thenReturn( new File[] { jobs, reports } );
     Exception exception = new RuntimeException( "exception thrown on purpose from testWillContinueToLoadOnException" );
     doThrow( exception ).when( importer ).importFile( argThat( bundleMatcher( jobsName, inputStream ) ) );
-    IRepositoryImportLogger logger = mock( IRepositoryImportLogger.class );
-    when( importer.getRepositoryImportLogger() ).thenReturn( logger );
     loader.loadAll( directory, ZIPS_FILTER );
     verify( importer ).importFile( argThat( bundleMatcher( jobsName, inputStream ) ) );
     verify( importer ).importFile( argThat( bundleMatcher( reportsName, inputStream ) ) );
@@ -135,18 +128,16 @@ public class ArchiveLoaderTest {
 
   @Test
   public void testLoadAllClearSession() throws Exception {
-    PowerMockito.mockStatic( ImportSession.class );
-    ImportSession importSession = mock( ImportSession.class );
-    when( ImportSession.getSession() ).thenReturn( importSession );
-
     IPlatformImporter importer = mock( IPlatformImporter.class );
-    ArchiveLoader loader = new ArchiveLoader( importer );
+    ArchiveLoader loader = spy( new ArchiveLoader( importer ) );
+    doReturn( mock( FileInputStream.class ) ).when( loader ).createInputStream( nullable( File.class ) );
+    doCallRealMethod().when( loader ).loadAll( any( File.class ), any( FilenameFilter.class ) );
     File directoryMock = mock( File.class );
     File file1Mock = mock( File.class );
     File file2Mock = mock( File.class );
     when( directoryMock.listFiles( ZIPS_FILTER ) ).thenReturn( new File[] { file1Mock, file2Mock } );
     loader.loadAll( directoryMock, ArchiveLoader.ZIPS_FILTER );
-    PowerMockito.verifyStatic( VerificationModeFactory.times( 2 ) );
+    verify( importer, Mockito.times( 2 ) ).importFile( any( IPlatformImportBundle.class ) );
     ImportSession.clearSession();
   }
 
