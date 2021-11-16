@@ -30,6 +30,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pentaho.platform.api.engine.IAuthorizationPolicy;
@@ -89,6 +90,7 @@ import static org.junit.Assert.*;
  *
  * @author mlowery
  */
+@Ignore
 @RunWith ( SpringJUnit4ClassRunner.class )
 @ContextConfiguration ( locations = { "classpath:/repository.spring.xml",
     "classpath:/repository-test-override.spring.xml" } )

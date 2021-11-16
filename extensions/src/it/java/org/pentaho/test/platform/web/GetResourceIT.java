@@ -47,6 +47,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.spy;

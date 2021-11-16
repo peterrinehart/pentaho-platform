@@ -371,7 +371,7 @@ public class SolutionImportHandlerNamingIT extends Assert {
     answer = new AnswerTest<RepositoryFile>() {
       @Override
       public RepositoryFile answer( InvocationOnMock invocation ) throws Throwable {
-        obj = invocation.getArgumentAt( 1, RepositoryFile.class );
+        obj = invocation.getArgument( 1, RepositoryFile.class );
         return null;
       }
     };

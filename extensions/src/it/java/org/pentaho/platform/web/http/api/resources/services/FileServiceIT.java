@@ -20,51 +20,6 @@
 
 package org.pentaho.platform.web.http.api.resources.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyListOf;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.nio.channels.IllegalSelectorException;
-import java.security.GeneralSecurityException;
-import java.security.InvalidParameterException;
-import java.text.Collator;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.ws.rs.core.StreamingOutput;
-
 import org.apache.commons.lang.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -90,6 +45,11 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFileAcl;
 import org.pentaho.platform.api.repository2.unified.RepositoryFilePermission;
 import org.pentaho.platform.api.repository2.unified.RepositoryRequest;
 import org.pentaho.platform.api.repository2.unified.data.simple.SimpleRepositoryFileData;
+import org.pentaho.platform.api.repository2.unified.webservices.RepositoryFileAclAceDto;
+import org.pentaho.platform.api.repository2.unified.webservices.RepositoryFileAclDto;
+import org.pentaho.platform.api.repository2.unified.webservices.RepositoryFileDto;
+import org.pentaho.platform.api.repository2.unified.webservices.RepositoryFileTreeDto;
+import org.pentaho.platform.api.repository2.unified.webservices.StringKeyStringValueDto;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.services.importer.IPlatformImporter;
@@ -105,11 +65,6 @@ import org.pentaho.platform.repository2.unified.fileio.RepositoryFileOutputStrea
 import org.pentaho.platform.repository2.unified.jcr.PentahoJcrConstants;
 import org.pentaho.platform.repository2.unified.webservices.DefaultUnifiedRepositoryWebService;
 import org.pentaho.platform.repository2.unified.webservices.PropertiesWrapper;
-import org.pentaho.platform.api.repository2.unified.webservices.RepositoryFileAclAceDto;
-import org.pentaho.platform.api.repository2.unified.webservices.RepositoryFileAclDto;
-import org.pentaho.platform.api.repository2.unified.webservices.RepositoryFileDto;
-import org.pentaho.platform.api.repository2.unified.webservices.RepositoryFileTreeDto;
-import org.pentaho.platform.api.repository2.unified.webservices.StringKeyStringValueDto;
 import org.pentaho.platform.scheduler2.quartz.QuartzScheduler;
 import org.pentaho.platform.security.policy.rolebased.actions.AdministerSecurityAction;
 import org.pentaho.platform.security.policy.rolebased.actions.RepositoryCreateAction;
@@ -118,9 +73,53 @@ import org.pentaho.platform.web.http.api.resources.SessionResource;
 import org.pentaho.platform.web.http.api.resources.Setting;
 import org.pentaho.platform.web.http.api.resources.StringListWrapper;
 import org.pentaho.platform.web.http.api.resources.utils.FileUtils;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import javax.ws.rs.core.StreamingOutput;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.nio.channels.IllegalSelectorException;
+import java.security.GeneralSecurityException;
+import java.security.InvalidParameterException;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith( PowerMockRunner.class )
 @PowerMockIgnore( "jdk.internal.reflect.*" )
@@ -165,7 +164,7 @@ public class FileServiceIT {
     pentahoObjectFactory = mock( IPentahoObjectFactory.class );
     platformImporter = mock( IPlatformImporter.class );
     when( pentahoObjectFactory.objectDefined( nullable( String.class ) ) ).thenReturn( true );
-    when( pentahoObjectFactory.get( this.anyClass(), nullable( String.class ), any( IPentahoSession.class ) ) ).thenAnswer(
+    when( pentahoObjectFactory.get( any(), nullable( String.class ), any( IPentahoSession.class ) ) ).thenAnswer(
         new Answer<Object>() {
           @Override
           public Object answer( InvocationOnMock invocation ) throws Throwable {
@@ -2271,17 +2270,6 @@ public class FileServiceIT {
       fail();
     } catch ( FileService.InvalidNameException e ) {
       assertNotNull( e );
-    }
-  }
-
-  private Class<?> anyClass() {
-    return argThat( new AnyClassMatcher() );
-  }
-
-  private class AnyClassMatcher extends ArgumentMatcher<Class<?>> {
-    @Override
-    public boolean matches( final Object arg ) {
-      return true;
     }
   }
 }

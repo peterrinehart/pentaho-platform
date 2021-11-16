@@ -71,7 +71,7 @@ public class RepositoryImportResourceIT {
     policy = mock( IAuthorizationPolicy.class );
     pentahoObjectFactory = mock( IPentahoObjectFactory.class );
     when( pentahoObjectFactory.objectDefined( nullable( String.class ) ) ).thenReturn( true );
-    when( pentahoObjectFactory.get( this.anyClass(), nullable( String.class ), any( IPentahoSession.class ) ) ).thenAnswer(
+    when( pentahoObjectFactory.get( any(), nullable( String.class ), any( IPentahoSession.class ) ) ).thenAnswer(
         new Answer<Object>() {
           @Override
           public Object answer( InvocationOnMock invocation ) throws Throwable {
@@ -137,16 +137,5 @@ public class RepositoryImportResourceIT {
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass( String.class );
     verify( policy, atLeastOnce() ).isAllowed( captor.capture() );
     assertTrue( captor.getAllValues().containsAll( perms ) );
-  }
-
-  private Class<?> anyClass() {
-    return argThat( new AnyClassMatcher() );
-  }
-
-  private class AnyClassMatcher extends ArgumentMatcher<Class<?>> {
-    @Override
-    public boolean matches( final Object arg ) {
-      return true;
-    }
   }
 }
