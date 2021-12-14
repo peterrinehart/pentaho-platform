@@ -20,11 +20,12 @@
 
 package org.pentaho.platform.web.http.api.resources;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.helpers.Loader;
-import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,7 +45,8 @@ public class Log4jResourceTest {
     Logger root = LogManager.getRootLogger();
     Level initialLevel = root.getLevel();
     assertNotEquals( initialLevel, Level.ALL );
-    root.setLevel( Level.ALL );
+
+    setLogLevel( root.getName(), Level.ALL );
     assertEquals( Level.ALL, root.getLevel() );
 
     Response res = target.reloadConfiguration();
@@ -60,10 +62,10 @@ public class Log4jResourceTest {
 
     res = target.updateLogLevel( "debug", null );
     int notDebug = 0;
-    Enumeration e = LogManager.getCurrentLoggers();
-    while ( e.hasMoreElements() ) {
-      Logger logger = (Logger) e.nextElement();
-      if ( !Level.DEBUG.equals( logger.getLevel() ) ) {
+    LoggerContext ctx = (LoggerContext) LogManager.getContext( false );
+    Configuration config = ctx.getConfiguration();
+    for ( LoggerConfig loggerConfig : config.getLoggers().values() ) {
+      if ( !Level.DEBUG.equals( loggerConfig.getLevel() ) ) {
         notDebug++;
       }
     }
@@ -89,7 +91,17 @@ public class Log4jResourceTest {
 
   @Before
   public void readFromConfig() {
-    DOMConfigurator.configure( Loader.getResource( CONFIG ) );
+    ( ( LoggerContext ) LogManager.getContext( true ) ).reconfigure();
+  }
+
+  private void setLogLevel( String loggerName, Level level ) {
+    LoggerContext ctx = (LoggerContext) LogManager.getContext( false );
+    Configuration config = ctx.getConfiguration();
+    LoggerConfig loggerConfig = config.getLoggerConfig( loggerName );
+    if ( null != loggerConfig ) {
+      loggerConfig.setLevel( level );
+      ctx.updateLoggers();
+    }
   }
 
 }

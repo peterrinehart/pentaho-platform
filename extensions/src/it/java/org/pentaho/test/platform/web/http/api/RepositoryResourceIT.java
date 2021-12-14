@@ -34,8 +34,8 @@ import com.sun.jersey.test.framework.spi.container.grizzly.web.GrizzlyWebTestCon
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -140,11 +140,11 @@ public class RepositoryResourceIT extends JerseyTest implements ApplicationConte
   @BeforeClass
   public static void beforeClass() throws Exception {
     System.setProperty( SYSTEM_PROPERTY, "MODE_GLOBAL" );
-    Logger.getLogger( "org" ).setLevel( Level.WARN );
-    Logger.getLogger( "org.pentaho" ).setLevel( Level.WARN );
-    Logger.getLogger( RepositoryResource.class ).setLevel( Level.DEBUG );
-    // Logger.getLogger(RequestProxy.class).setLevel(Level.DEBUG);
-    Logger.getLogger( "MIME_TYPE" ).setLevel( Level.TRACE );
+    LogManager.getLogger( "org" ).setLevel( Level.WARN );
+    LogManager.getLogger( "org.pentaho" ).setLevel( Level.WARN );
+    LogManager.getLogger( RepositoryResource.class ).setLevel( Level.DEBUG );
+    // LogManager.getLogger(RequestProxy.class).setLevel(Level.DEBUG);
+    LogManager.getLogger( "MIME_TYPE" ).setLevel( Level.TRACE );
 
     DefaultUnifiedRepositoryBase.setUpClass();
   }

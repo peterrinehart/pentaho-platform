@@ -20,9 +20,13 @@
 
 package org.pentaho.platform.plugin.action.kettle;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.pentaho.di.core.logging.KettleLogLayout;
 import org.pentaho.di.core.logging.KettleLoggingEvent;
 import org.pentaho.di.core.logging.KettleLoggingEventListener;
@@ -42,17 +46,21 @@ public class Log4jForwardingKettleLoggingEventListener implements KettleLoggingE
    *          The appender to forward logging to.
    */
   public Log4jForwardingKettleLoggingEventListener( Appender appender ) {
-    pentahoLogger = Logger.getLogger( STRING_PENTAHO_DI_LOGGER_NAME );
-    pentahoLogger.setAdditivity( false );
+    pentahoLogger = LogManager.getLogger( STRING_PENTAHO_DI_LOGGER_NAME );
+    LoggerContext ctx = (LoggerContext) LogManager.getContext( false );
+    Configuration config = ctx.getConfiguration();
+    LoggerConfig loggerConfig = config.getLoggerConfig( pentahoLogger.getName() );
+    loggerConfig.setAdditive( false );
+
 
     // ensure all messages get logged in this logger since we filtered it above
     // we do not set the level in the rootLogger so the rootLogger can decide by itself (e.g. in the platform)
     //
-    pentahoLogger.setLevel( Level.ALL );
+    loggerConfig.setLevel( Level.ALL );
 
     // Now add the appender to the logger so that everything gets routed there...
     //
-    pentahoLogger.addAppender( appender );
+    loggerConfig.addAppender( appender, Level.ALL, null );
 
     // The layout
     //

@@ -117,10 +117,10 @@ public class KettleSystemListener implements IPentahoSystemListener {
     // Find the platform file listener (if any) and make sure it gets data from Kettle.
     // We listen to the log records from Kettle and pass logging along
     //
-    Enumeration<org.apache.log4j.Appender> appenders = org.apache.log4j.Logger.getRootLogger().getAllAppenders();
+    Enumeration<org.apache.logging.log4j.Appender> appenders = org.apache.logging.log4j.Logger.getRootLogger().getAllAppenders();
     while ( appenders.hasMoreElements() ) {
-      org.apache.log4j.Appender appender = appenders.nextElement();
-      if ( appender instanceof org.apache.log4j.FileAppender ) {
+      org.apache.logging.log4j.Appender appender = appenders.nextElement();
+      if ( appender instanceof org.apache.logging.log4j.FileAppender ) {
 
         Log4jForwardingKettleLoggingEventListener listener = new Log4jForwardingKettleLoggingEventListener( appender );
         KettleLogStore.getAppender().addLoggingEventListener( listener );

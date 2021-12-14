@@ -20,10 +20,11 @@
 
 package org.pentaho.platform.plugin.services.importexport;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.MDC;
-import org.apache.log4j.WriterAppender;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.appender.WriterAppender;
+import org.slf4j.MDC;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -55,12 +56,12 @@ public class Log4JRepositoryImportLog {
 
   private void init() {
     logName = "RepositoryImportLog." + getThreadName();
-    logger = Logger.getLogger( logName );
-    logger.setLevel( logLevel );
-    RepositoryImportHTMLLayout htmlLayout = new RepositoryImportHTMLLayout( logLevel );
-    htmlLayout.setTitle( "Repository Import Log" );
-    writeAppender = new WriterAppender( htmlLayout, new OutputStreamWriter( outputStream, Charset.forName( "utf-8" ) ) );
-    logger.addAppender( writeAppender );
+    logger = LogManager.getLogger( logName );
+    //logger.setLevel( logLevel );
+//    RepositoryImportHTMLLayout htmlLayout = new RepositoryImportHTMLLayout( logLevel );
+//    htmlLayout.setTitle( "Repository Import Log" );
+    //writeAppender = new WriterAppender( htmlLayout, new OutputStreamWriter( outputStream, Charset.forName( "utf-8" ) ) );
+    //logger.addAppender( writeAppender );
   }
 
   public Logger getLogger() {
@@ -91,13 +92,13 @@ public class Log4JRepositoryImportLog {
   }
 
   protected void endJob() {
-    try {
-      outputStream.write( writeAppender.getLayout().getFooter().getBytes() );
-    } catch ( Exception e ) {
-      System.out.println( e );
-      // Don't try logging a log error.
-    }
-    logger.removeAppender( writeAppender );
+//    try {
+//      outputStream.write( writeAppender.getLayout().getFooter().getBytes() );
+//    } catch ( Exception e ) {
+//      System.out.println( e );
+//      // Don't try logging a log error.
+//    }
+//    logger.removeAppender( writeAppender );
   }
 
   private String getThreadName() {

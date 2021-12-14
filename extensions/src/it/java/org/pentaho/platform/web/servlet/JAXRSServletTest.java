@@ -249,7 +249,7 @@ public class JAXRSServletTest {
     java.util.logging.Logger.getLogger( JAXRSServlet.class.getName() ).setLevel( Level.ALL );
 
     // Try Log4J as backend
-    org.apache.log4j.Logger.getLogger( JAXRSServlet.class ).setLevel( org.apache.log4j.Level.DEBUG );
+    org.apache.logging.log4j.LogManager.getLogger( JAXRSServlet.class ).setLevel( org.apache.logging.log4j.Level.DEBUG );
   }
 
   @Test

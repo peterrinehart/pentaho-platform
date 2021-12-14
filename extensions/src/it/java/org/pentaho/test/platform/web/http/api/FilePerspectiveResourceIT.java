@@ -30,9 +30,9 @@ import com.sun.jersey.test.framework.spi.container.grizzly.GrizzlyTestContainerF
 import com.sun.jersey.test.framework.spi.container.grizzly.web.GrizzlyWebTestContainerFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.BasicConfigurator;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -102,7 +102,7 @@ public class FilePerspectiveResourceIT extends JerseyTest {
   @BeforeClass
   public static void beforeClass() throws Exception {
     BasicConfigurator.configure();
-    Logger.getLogger( RequestProxy.class ).setLevel( Level.DEBUG );
+    LogManager.getLogger( RequestProxy.class ).setLevel( Level.DEBUG );
   }
 
   @AfterClass
