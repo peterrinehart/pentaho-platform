@@ -20,7 +20,7 @@
 
 package org.pentaho.platform.plugin.action.kettle;
 
-import org.apache.logging.log4j.FileAppender;
+import org.apache.logging.log4j.core.appender.FileAppender;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,18 +44,18 @@ import static org.mockito.Mockito.when;
 
 public class KettleSystemListenerTest {
   private IApplicationContext mockApplicationContext;
-  private FileAppender fileAppender = new FileAppender();
+//  private FileAppender fileAppender = new FileAppender();
 
   @Before
   public void setup() {
     mockApplicationContext = mock( IApplicationContext.class );
-    org.apache.logging.log4j.Logger.getRootLogger().addAppender( fileAppender );
+    //org.apache.logging.log4j.LogManager.getRootLogger().addAppender( fileAppender );
     PentahoSystem.setApplicationContext( mockApplicationContext );
   }
 
   @After
   public void teardown() {
-    org.apache.logging.log4j.Logger.getRootLogger().removeAppender( fileAppender );
+//    org.apache.logging.log4j.Logger.getRootLogger().removeAppender( fileAppender );
   }
 
   @Test

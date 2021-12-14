@@ -54,7 +54,7 @@ public class ResultSetCompareComponentTest {
 
   @Before
   public void setUp() {
-    LogManager.getRootLogger().setLevel( Level.OFF );
+    //LogManager.getRootLogger().setLevel( Level.OFF );
   }
 
   @Test
@@ -157,7 +157,7 @@ public class ResultSetCompareComponentTest {
 
   @After
   public void tearDown() {
-    LogManager.getRootLogger().setLevel( level );
+    //LogManager.getRootLogger().setLevel( level );
   }
 
   private static int callValidationWithResultSets( IPentahoResultSet resultSet1, IPentahoResultSet resultSet2 ) {

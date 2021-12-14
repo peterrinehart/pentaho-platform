@@ -22,6 +22,11 @@ package org.pentaho.platform.plugin.action.kettle;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
@@ -46,9 +51,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 public class KettleSystemListener implements IPentahoSystemListener {
 
@@ -117,11 +124,11 @@ public class KettleSystemListener implements IPentahoSystemListener {
     // Find the platform file listener (if any) and make sure it gets data from Kettle.
     // We listen to the log records from Kettle and pass logging along
     //
-    Enumeration<org.apache.logging.log4j.Appender> appenders = org.apache.logging.log4j.Logger.getRootLogger().getAllAppenders();
-    while ( appenders.hasMoreElements() ) {
-      org.apache.logging.log4j.Appender appender = appenders.nextElement();
-      if ( appender instanceof org.apache.logging.log4j.FileAppender ) {
+    LoggerContext ctx = (LoggerContext) LogManager.getContext( false );
+    Configuration config = ctx.getConfiguration();
 
+    for( Appender appender : config.getAppenders().values() ) {
+      if ( appender instanceof org.apache.logging.log4j.core.appender.FileAppender ) {
         Log4jForwardingKettleLoggingEventListener listener = new Log4jForwardingKettleLoggingEventListener( appender );
         KettleLogStore.getAppender().addLoggingEventListener( listener );
       }
