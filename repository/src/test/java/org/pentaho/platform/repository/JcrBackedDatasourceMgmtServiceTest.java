@@ -325,7 +325,7 @@ public class JcrBackedDatasourceMgmtServiceTest {
         + ". Cause: null" );
   }
 
-  @Test( expected = DatasourceMgmtServiceException.class )
+  @Test
   public void testUpdateDatasourceWithName() throws Exception {
     final String fileId = "456";
     final String databasesFolderPath = "/etc/pdi/databases";
@@ -344,12 +344,13 @@ public class JcrBackedDatasourceMgmtServiceTest {
     doReturn( f ).when( repo )
       .updateFile( nullable( RepositoryFile.class ), nullable( NodeRepositoryFileData.class ),
         nullable( String.class ) );
-    IDatasourceMgmtService datasourceMgmtService =
-      new JcrBackedDatasourceMgmtService( repo, new DatabaseDialectService() );
+    JcrBackedDatasourceMgmtService spy =
+      spy( new JcrBackedDatasourceMgmtService( repo, new DatabaseDialectService() ) );
+    when( spy.hasDataAccessPermission() ).thenReturn( true );
 
     IDatabaseConnection databaseConnection = createDatabaseConnection( EXP_DBMETA_NAME );
     updateDatabaseConnection( databaseConnection );
-    datasourceMgmtService.updateDatasourceByName( EXP_DBMETA_NAME, databaseConnection );
+    spy.updateDatasourceByName( EXP_DBMETA_NAME, databaseConnection );
 
     verify( repo ).updateFile( argThat( isLikeFile( new RepositoryFile.Builder( EXP_DBMETA_NAME + ".kdb" ).build() ) ),
       argThat( hasData( pathPropertyPair( "/databaseMeta/HOST_NAME", EXP_UPDATED_DBMETA_HOSTNAME ) ) ),
@@ -381,9 +382,6 @@ public class JcrBackedDatasourceMgmtServiceTest {
     final String databasesFolderPath = "/etc/pdi/databases";
     final String dotKdb = ".kdb";
     IUnifiedRepository repo = mock( IUnifiedRepository.class );
-    // stub out get parent folder
-    doReturn( new RepositoryFile.Builder( "123", "databases" ).folder( true ).build() ).when( repo ).getFile(
-      databasesFolderPath );
     doReturn( reservedChars ).when( repo ).getReservedChars();
     // stub out get file to update
     RepositoryFile f =
