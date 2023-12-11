@@ -21,6 +21,9 @@ package org.pentaho.platform.plugin.services.pluginmgr;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.sun.xml.ws.transport.http.servlet.ServletAdapter;
+import com.sun.xml.ws.transport.http.servlet.ServletAdapterList;
+import com.sun.xml.ws.transport.http.servlet.SpringBinding;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -63,6 +66,7 @@ import org.pentaho.platform.engine.core.system.objfac.references.SingletonPentah
 import org.pentaho.platform.plugin.services.messages.Messages;
 import org.pentaho.platform.plugin.services.pluginmgr.servicemgr.ServiceConfig;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
+import org.pentaho.platform.web.servlet.PentahoPluginWSSpringServlet;
 import org.pentaho.ui.xul.XulOverlay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,13 +82,22 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -390,6 +403,8 @@ public class PentahoSystemPluginManager implements IPluginManager {
     // a service class may be configured as a plugin bean
     registerServices( plugin, loader, beanFactory );
 
+    createWSServlet( plugin, loader, beanFactory );
+
     PluginMessageLogger
       .add( Messages.getInstance().getString( "PluginManager.PLUGIN_REGISTERED", plugin.getId() ) );
     try {
@@ -433,6 +448,70 @@ public class PentahoSystemPluginManager implements IPluginManager {
             "PluginManager.ERROR_0025_SERVICE_REGISTRATION_FAILED", ws.getId(), plugin.getId() ), e ); //$NON-NLS-1$
         }
       }
+    }
+  }
+
+  private void createWSServlet( IPlatformPlugin plugin, ClassLoader pluginClassloader, GenericApplicationContext beanFactory )
+    throws PlatformPluginRegistrationException {
+    String pluginPath = PentahoSystem.getApplicationContext().getSolutionPath( "system/" + plugin.getSourceDescription() );
+    File f = new File( pluginPath + File.separator + "plugin.spring.xml" );
+    boolean found = false;
+    if ( f.exists() ) {
+      // look for any wss:bingding entries; skip if none found
+      try ( BufferedReader br = new BufferedReader( new FileReader( f ) ) ) {
+        String s = br.readLine();
+        while ( null != s && !found ) {
+          if ( s.contains( "wss:binding" ) ) {
+            found = true;
+          }
+          s = br.readLine();
+        }
+      } catch ( IOException e ) {
+        return;
+      }
+    }
+    if ( !found ) {
+      return;
+    }
+    PentahoPluginWSSpringServlet servlet = new PentahoPluginWSSpringServlet();
+    ServletContext servletContext = (ServletContext) PentahoSystem.getApplicationContext().getContext();
+    if ( null == servletContext ) {
+      return;
+    }
+    ServletConfig servletConfig = new ServletConfig() {
+      @Override public String getServletName() {
+        return plugin.getId() + "_WSServlet";
+      }
+
+      @Override public ServletContext getServletContext() {
+        return servletContext;
+      }
+
+      @Override public String getInitParameter( String s ) {
+        return null;
+      }
+
+      @Override public Enumeration<String> getInitParameterNames() {
+        return new Enumeration<String>() {
+          @Override public boolean hasMoreElements() {
+            return false;
+          }
+
+          @Override public String nextElement() {
+            return null;
+          }
+        };
+      }
+    };
+    try {
+      servlet.init( servletConfig, pluginPath, pluginClassloader, beanFactory );
+      ServletRegistration.Dynamic registration = servletContext.addServlet( plugin.getId() + "_WSServlet", servlet );
+      ServletAdapterList adapters = servlet.getAdapters();
+      for ( ServletAdapter adapter : adapters ) {
+        registration.addMapping( adapter.urlPattern );
+      }
+    } catch ( ServletException e ) {
+      throw new PlatformPluginRegistrationException( "Error creating webservice servlet for " + plugin.getId(), e );
     }
   }
 
