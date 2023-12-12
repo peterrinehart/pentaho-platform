@@ -403,7 +403,7 @@ public class PentahoSystemPluginManager implements IPluginManager {
     // a service class may be configured as a plugin bean
     registerServices( plugin, loader, beanFactory );
 
-    createWSServlet( plugin, loader, beanFactory );
+    //createWSServlet( plugin, loader, beanFactory );
 
     PluginMessageLogger
       .add( Messages.getInstance().getString( "PluginManager.PLUGIN_REGISTERED", plugin.getId() ) );
@@ -503,16 +503,16 @@ public class PentahoSystemPluginManager implements IPluginManager {
         };
       }
     };
-    try {
-      servlet.init( servletConfig, pluginPath, pluginClassloader, beanFactory );
-      ServletRegistration.Dynamic registration = servletContext.addServlet( plugin.getId() + "_WSServlet", servlet );
-      ServletAdapterList adapters = servlet.getAdapters();
-      for ( ServletAdapter adapter : adapters ) {
-        registration.addMapping( adapter.urlPattern );
-      }
-    } catch ( ServletException e ) {
-      throw new PlatformPluginRegistrationException( "Error creating webservice servlet for " + plugin.getId(), e );
-    }
+//    try {
+//      //servlet.init( servletConfig, pluginPath, pluginClassloader, beanFactory );
+//      ServletRegistration.Dynamic registration = servletContext.addServlet( plugin.getId() + "_WSServlet", servlet );
+//      ServletAdapterList adapters = servlet.getAdapters();
+//      for ( ServletAdapter adapter : adapters ) {
+//        registration.addMapping( adapter.urlPattern );
+//      }
+//    } catch ( ServletException e ) {
+//      throw new PlatformPluginRegistrationException( "Error creating webservice servlet for " + plugin.getId(), e );
+//    }
   }
 
   /*
