@@ -47,19 +47,19 @@ import java.util.regex.Pattern;
 
 public class PentahoPluginWSSpringServlet extends HttpServlet {
 
-  private Pattern uriPattern = Pattern.compile( ".*/webservices/plugins/([-\\w])/.+" );
-  private ServletConfig servletConfig;
+  private Pattern uriPattern = Pattern.compile( ".*/webservices/plugins/([-\\w]+)/.+" );
   Map<String, WSServletDelegate> delegateMap = new HashMap<>();
   ServletAdapterList adapters = new ServletAdapterList();
   public void init( ServletConfig servletConfig ) throws ServletException {
     super.init( servletConfig );
-    this.servletConfig = servletConfig;
   }
 
   @SuppressWarnings( "unchecked" )
   protected WSServletDelegate createPluginWSDelegate( String pluginPath, ClassLoader pluginClassLoader ) {
     ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
     try {
+      // this needs to be set because when the Spring service tries to create the webservice endpoint, something
+      // buried in the webservice implementation tries to use the thread's classloader to instantiate the object
       Thread.currentThread().setContextClassLoader( pluginClassLoader );
       ApplicationContext appContext = getAppContext( pluginPath, pluginClassLoader );
 
