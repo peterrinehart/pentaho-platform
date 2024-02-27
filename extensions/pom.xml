@@ -27,6 +27,8 @@
     <pentaho-actionsequence-dom.version>10.2.0.0-SNAPSHOT</pentaho-actionsequence-dom.version>
     <pentaho-metadata.version>10.2.0.0-SNAPSHOT</pentaho-metadata.version>
     <pentaho-chartbeans.version>10.2.0.0-SNAPSHOT</pentaho-chartbeans.version>
+    <maven-surefire-plugin.argLine> --add-opens=java.base/java.lang=ALL-UNNAMED </maven-surefire-plugin.argLine>
+    <nashorn.version>15.4</nashorn.version>
   </properties>
   <dependencies>
     <!-- @Null, @Nullable annotations -->
@@ -2148,6 +2150,12 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openjdk.nashorn</groupId>
+      <artifactId>nashorn-core</artifactId>
+      <version>${nashorn.version}</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
