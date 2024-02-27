@@ -21,6 +21,8 @@
 package org.pentaho.platform.api.engine;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -35,6 +37,7 @@ import static org.mockito.Mockito.times;
  * @author tkafalas
  *
  */
+@RunWith( MockitoJUnitRunner.class )
 public class ServerStatusProviderTest {
   private IServerStatusProvider serverStatusProvider;
   static final String MESSAGE1 = "This is a test";

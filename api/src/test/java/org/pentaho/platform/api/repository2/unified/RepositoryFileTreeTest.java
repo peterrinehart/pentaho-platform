@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -88,7 +88,7 @@ public class RepositoryFileTreeTest {
   @Test
   public void testBuilder() {
     RepositoryFile nullFile =
-        new RepositoryFile( null, null, false, false, true,
+        new RepositoryFile( "null", null, false, false, true,
       false, null, null, null, null, false, null, null, null, null, null, null, null, null, new Long( 1 ), null, null );
     RepositoryFileTree.Builder nullBuilder = new RepositoryFileTree.Builder( nullFile );
     RepositoryFileTree anotherFileTree = nullBuilder.build();
