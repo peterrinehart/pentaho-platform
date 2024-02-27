@@ -23,7 +23,7 @@ package org.pentaho.platform.api.ui;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * Created by bgroves on 10/26/15.
