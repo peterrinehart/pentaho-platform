@@ -20,7 +20,7 @@
 
 package org.pentaho.platform.engine.core.system.objfac.references;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.api.engine.IObjectCreator;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
@@ -28,7 +28,7 @@ import org.pentaho.platform.engine.core.system.StandaloneSession;
 
 import java.util.UUID;
 
-import static org.junit.Assert.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 /**
  * Created by nbaker on 4/16/14.

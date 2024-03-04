@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.pentaho.platform.api.engine.IContentInfo;
 import org.pentaho.platform.api.engine.IPentahoObjectReference;
 import org.pentaho.platform.api.engine.ISystemConfig;
@@ -46,7 +46,7 @@ import junit.framework.TestCase;
 @SuppressWarnings( { "all" } )
 public class StandaloneSpringPentahoObjectFactoryTest extends TestCase {
 
-  @Before
+  @BeforeEach
   public void setup() {
     PentahoSystem.clearObjectFactory();
   }

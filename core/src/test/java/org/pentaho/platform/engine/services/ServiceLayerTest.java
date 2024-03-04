@@ -29,10 +29,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import org.pentaho.platform.api.engine.ILogger;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPentahoUrlFactory;
@@ -44,8 +44,12 @@ import org.pentaho.platform.engine.core.system.boot.PlatformInitializationExcept
 import org.pentaho.platform.util.web.SimpleUrlFactory;
 import org.pentaho.test.platform.engine.core.MicroPlatform;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @SuppressWarnings( "nls" )
-public class ServiceLayerTest extends Assert {
+public class ServiceLayerTest {
 
   private static final String SYSTEM_FOLDER = "/system";
 
@@ -55,7 +59,7 @@ public class ServiceLayerTest extends Assert {
 
   private static MicroPlatform mp;
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws PlatformInitializationException {
     mp = new MicroPlatform( SOLUTION_PATH );
     mp.setSpringConfig( SOLUTION_PATH + SYSTEM_FOLDER + "/" + DEFAULT_SPRING_CONFIG_FILE_NAME );
@@ -89,13 +93,13 @@ public class ServiceLayerTest extends Assert {
       IRuntimeContext runtimeContext =
           solutionEngine.execute( xactionStr, "test1.xaction", "empty action sequence test", false, true, instanceId, //$NON-NLS-1$ //$NON-NLS-2$
               false, parameterProviderMap, null, null, urlFactory, messages );
-      assertNotNull( "RuntimeContext is null", runtimeContext );
-      assertEquals( "Action sequence execution failed", runtimeContext.getStatus(),
-          IRuntimeContext.RUNTIME_STATUS_SUCCESS );
+      assertNotNull( runtimeContext, "RuntimeContext is null" );
+      assertEquals( runtimeContext.getStatus(),
+          IRuntimeContext.RUNTIME_STATUS_SUCCESS, "Action sequence execution failed" );
     } catch ( Exception e ) {
       // we should not get here
       e.printStackTrace();
-      assertTrue( e.getMessage(), false );
+      assertTrue( false, e.getMessage() );
     } finally {
       if ( reader != null ) {
         reader.close();
@@ -103,7 +107,7 @@ public class ServiceLayerTest extends Assert {
     }
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() {
     mp.stop();
   }

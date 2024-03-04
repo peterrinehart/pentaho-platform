@@ -20,8 +20,8 @@
 
 package org.pentaho.platform.engine.core;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.engine.core.solution.CustomSettingsParameterProvider;
 import org.pentaho.platform.engine.core.solution.SystemSettingsParameterProvider;
 import org.pentaho.platform.engine.core.system.StandaloneSession;
@@ -35,7 +35,7 @@ public class SettingsParameterProviderTest {
 
   public static final String SOLUTION_PATH = "src/test/resources/solution";
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws PlatformInitializationException {
     new MicroPlatform( SOLUTION_PATH ).start();
   }

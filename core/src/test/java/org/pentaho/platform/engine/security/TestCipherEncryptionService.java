@@ -20,8 +20,8 @@
 
 package org.pentaho.platform.engine.security;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.util.UUIDUtil;
 
 import java.util.concurrent.ArrayBlockingQueue;

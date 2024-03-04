@@ -20,8 +20,8 @@
 
 package org.pentaho.platform.workitem;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -31,7 +31,7 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
 
-@RunWith( MockitoJUnitRunner.class )
+@ExtendWith( MockitoJUnitRunner.class )
 public class WorkItemLifecycleEventUtilTest {
 
   private final WorkItemLifecyclePhase lifecyclePhase = WorkItemLifecyclePhase.DISPATCHED;

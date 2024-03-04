@@ -20,8 +20,8 @@
 
 package org.pentaho.platform.util;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.pentaho.platform.api.email.IEmailConfiguration;
 import org.pentaho.platform.api.email.IEmailService;
@@ -31,10 +31,10 @@ import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class EmailerTest {
 
@@ -61,7 +61,7 @@ public class EmailerTest {
           + "<html><h1>Shiny test string<h1><html/>\n"
           + "------=_Part_2_299015846.1466492684508--";
 
-  @Before
+  @BeforeEach
   public void setUp() {
     emailer = new Emailer();
 

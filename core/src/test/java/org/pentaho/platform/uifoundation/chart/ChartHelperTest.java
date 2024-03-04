@@ -19,9 +19,9 @@
  */
 package org.pentaho.platform.uifoundation.chart;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -40,14 +40,14 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@ExtendWith( MockitoJUnitRunner.class )
 public class ChartHelperTest {
 
   @Mock
   IParameterProvider parameterProvider;
   ILogger logger;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     logger = new SimpleLogger( ChartHelperTest.class );
     when( parameterProvider.getStringParameter( anyString(), any() ) )

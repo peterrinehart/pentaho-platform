@@ -39,8 +39,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -64,7 +64,7 @@ public class OSGIObjectFactoryTest {
   private Bundle mockBundle;
   private OSGIObjectFactory factory;
 
-  @Before
+  @BeforeEach
   public void setup() {
     session = new StandaloneSession();
     mockContext = Mockito.mock( BundleContext.class );

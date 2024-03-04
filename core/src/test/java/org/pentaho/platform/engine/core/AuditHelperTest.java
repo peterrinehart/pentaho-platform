@@ -21,14 +21,14 @@
 
 package org.pentaho.platform.engine.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pentaho.platform.api.engine.IAuditEntry;
@@ -53,7 +53,7 @@ public class AuditHelperTest {
   @Mock
   private IRuntimeContext context;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks( this );
     session = new StandaloneSession( SESSION_NAME );

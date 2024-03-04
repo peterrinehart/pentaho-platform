@@ -20,15 +20,15 @@
 
 package org.pentaho.platform.engine.services.connection.datasource.dbcp;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -37,7 +37,7 @@ import org.pentaho.platform.api.data.DBDatasourceServiceException;
 import org.pentaho.platform.api.data.IDBDatasourceService;
 import org.pentaho.platform.engine.services.MockDataSourceService;
 
-@RunWith( MockitoJUnitRunner.class )
+@ExtendWith( MockitoJUnitRunner.class )
 public class DynamicallyPooledDatasourceSystemListenerTest {
 
   private static final String CONNECTION_NAME = "TEST CONNECTION";
@@ -50,7 +50,7 @@ public class DynamicallyPooledDatasourceSystemListenerTest {
   DynamicallyPooledDatasourceSystemListener listener;
 
 
-  @Before
+  @BeforeEach
   public void before() {
     when( connection.getName() ).thenReturn( CONNECTION_NAME );
   }

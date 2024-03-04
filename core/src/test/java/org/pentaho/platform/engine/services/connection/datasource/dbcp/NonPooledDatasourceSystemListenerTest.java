@@ -33,8 +33,8 @@ import static org.mockito.Mockito.when;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pentaho.database.model.DatabaseAccessType;
@@ -59,7 +59,7 @@ public class NonPooledDatasourceSystemListenerTest {
   @Mock
   ICacheManager ICacheManagerMock;
 
-  @Before
+  @BeforeEach
   public void init() {
     MockitoAnnotations.initMocks( this );
   }

@@ -20,13 +20,13 @@
 
 package org.pentaho.platform.engine.core;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.pentaho.platform.api.engine.IPentahoRequestContext;
 import org.pentaho.platform.engine.core.system.PentahoRequestContextHolder;

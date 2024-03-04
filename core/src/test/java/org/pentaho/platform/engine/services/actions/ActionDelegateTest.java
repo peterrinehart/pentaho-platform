@@ -20,13 +20,14 @@
 
 package org.pentaho.platform.engine.services.actions;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -41,8 +42,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pentaho.commons.connection.IPentahoStreamSource;
 import org.pentaho.platform.api.action.IAction;
 import org.pentaho.platform.api.action.IStreamingAction;
@@ -129,7 +130,7 @@ public class ActionDelegateTest {
     fruitDataExpected.add( cucumber );
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws PlatformInitializationException {
     booter = new MicroPlatform( SOLUTION_PATH );
     booter.define( ISolutionEngine.class, SolutionEngine.class, Scope.GLOBAL );
@@ -340,21 +341,21 @@ public class ActionDelegateTest {
    * Here we specify an content type output with coming from the "request" destination, which is unsupported by current
    * IOutputHandler implementations.
    */
-  @Test( expected = ActionSequenceException.class )
+  @Test
   public void testUnsupportedContentOutput() throws PlatformInitializationException, FileNotFoundException,
     ActionSequenceException {
     TestStreamingAction action1 = new TestStreamingAction();
 
     assertNull( action1.getMyContentOutputStream() );
-    execute( "testUnsupportedContentOutput.xaction", action1 );
+    assertThrows( ActionSequenceException.class, () -> execute( "testUnsupportedContentOutput.xaction", action1 ) );
     // by this point, we should see a nice stack trace in the log indicating the (expected) error
   }
 
-  @Test( expected = ActionSequenceException.class )
+  @Test
   public void testInputErrorCallbackFailedToSet() throws PlatformInitializationException, FileNotFoundException,
     ActionSequenceException {
     InputErrorCallbackFailedToSet action = new InputErrorCallbackFailedToSet();
-    execute( "testInputErrorCallbackFailedToSet.xaction", action );
+    assertThrows( ActionSequenceException.class, () -> execute( "testInputErrorCallbackFailedToSet.xaction", action ) );
   }
 
   @Test
@@ -385,29 +386,29 @@ public class ActionDelegateTest {
     // Check inputs
     //
     assertEquals( "string type input \"message\" is incorrect/not set", "Test 1..2..3", action.getMessage() );
-    assertArrayEquals( "addresseess input is incorrect/not set", new String[] { "admin", "suzy", "fred", "sam" }, action
-        .getAddressees().toArray() );
-    assertEquals( "long type input \"count\" is incorrect/not set", new Long( 99 ), action.getCount() );
-    assertNotNull( "property-map type input \"veggieData\" is not set", action.getVeggieData() );
+    assertArrayEquals( new String[] { "admin", "suzy", "fred", "sam" }, action
+        .getAddressees().toArray(), "addresseess input is incorrect/not set" );
+    assertEquals( new Long( 99 ), action.getCount(), "long type input \"count\" is incorrect/not set" );
+    assertNotNull( action.getVeggieData(), "property-map type input \"veggieData\" is not set" );
     assertMapsEquivalent( "property-map type input \"veggieData\" is incorrect", veggieDataExpected, action
         .getVeggieData() );
 
-    assertNotNull( "property-map-list type input \"fruitData\" is not set", action.getFruitData() );
-    assertEquals( "property-map-list type input \"fruitData\" wrong size", fruitDataExpected.size(), action
-        .getFruitData().size() );
+    assertNotNull( action.getFruitData(), "property-map-list type input \"fruitData\" is not set" );
+    assertEquals( fruitDataExpected.size(), action
+        .getFruitData().size(), "property-map-list type input \"fruitData\" wrong size" );
     for ( int i = 0; i < fruitDataExpected.size(); i++ ) {
       assertMapsEquivalent( "property-map-list type input \"fruitData\" list element [" + i + "] is incorrect",
           fruitDataExpected.get( i ), action.getFruitData().get( i ) );
     }
 
     // Check resources
-    assertNotNull( "resource \"embeddedXmlResource\" is incorrect/not set", action.getEmbeddedXmlResource() );
+    assertNotNull( action.getEmbeddedXmlResource(), "resource \"embeddedXmlResource\" is incorrect/not set" );
 
     // Check outputs
-    assertEquals( "output \"echoMessage\" is not set or incorrect", "Test String Output", action.getEchoMessage() );
+    assertEquals( "Test String Output", action.getEchoMessage(), "output \"echoMessage\" is not set or incorrect" );
 
     // Check that that the various methods were invoked
-    assertTrue( "execute method was not invoked", action.isExecuteWasCalled() );
+    assertTrue( action.isExecuteWasCalled(), "execute method was not invoked" );
   }
 
   private static boolean assertMapsEquivalent( String comment, Map<String, String> expected,

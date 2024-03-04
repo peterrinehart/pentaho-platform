@@ -20,11 +20,11 @@
 
 package org.pentaho.platform.engine.core.system.objfac.references;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * Created by nbaker on 4/16/14.

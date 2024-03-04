@@ -20,8 +20,8 @@
 
 package org.pentaho.platform.engine.core.system.objfac;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.api.engine.IObjectCreator;
 import org.pentaho.platform.api.engine.IPentahoObjectReference;
 import org.pentaho.platform.api.engine.IPentahoObjectRegistration;
@@ -36,13 +36,13 @@ import org.pentaho.platform.engine.core.system.objfac.references.SingletonPentah
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by nbaker on 2/28/14.
  */
 public class RuntimeObjectFactoryTest {
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     PentahoSystem.clearObjectFactory();
   }

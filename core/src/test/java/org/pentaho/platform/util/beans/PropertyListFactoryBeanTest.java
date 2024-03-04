@@ -21,7 +21,7 @@
 package org.pentaho.platform.util.beans;
 
 import junit.framework.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Properties;

@@ -25,14 +25,14 @@ import static org.mockito.Mockito.mock;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.IPentahoSession;
@@ -41,7 +41,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
 
-@RunWith( MockitoJUnitRunner.class )
+@ExtendWith( MockitoJUnitRunner.class )
 public class PentahoSessionStartupAuthenticationSuccessListenerTest {
 
   @Mock
@@ -52,7 +52,7 @@ public class PentahoSessionStartupAuthenticationSuccessListenerTest {
   private ByteArrayOutputStream baos;
   private PrintStream oldOut;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     baos = new ByteArrayOutputStream();
     oldOut = System.out;

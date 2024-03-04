@@ -20,15 +20,15 @@
 
 package org.pentaho.platform.engine.core.system.objfac.spring;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.servicecoordination.api.IServiceBarrier;
 import org.pentaho.platform.servicecoordination.api.IServiceBarrierManager;
 

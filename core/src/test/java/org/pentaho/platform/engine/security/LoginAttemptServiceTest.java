@@ -22,21 +22,21 @@
 package org.pentaho.platform.engine.security;
 
 import com.google.common.cache.LoadingCache;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.api.security.ILoginAttemptService;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LoginAttemptServiceTest {
 
   private ILoginAttemptService loginAttemptService;
   private String key;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     int maxAttempt = 10;
     int cacheMinutes = 24 * 60;

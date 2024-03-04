@@ -23,11 +23,11 @@ package org.pentaho.platform.core.mimetype;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.api.repository2.unified.Converter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import static org.mockito.Mockito.mock;
 
@@ -38,7 +38,7 @@ public class MimeTypeTest {
   public static final List<String> EXTENSIONS1 = Arrays.asList( EXTENSION_LIST1 );
   public static MimeType mimeType;
 
-  @Before
+  @BeforeEach
   public void setup() {
     mimeType = new MimeType();
   }

@@ -20,14 +20,14 @@
 
 package org.pentaho.platform.engine.security;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.GrantedAuthority;
@@ -51,7 +51,7 @@ public class PentahoSubstringRoleVoterTest {
 
   private PentahoSubstringRoleVoter pentahoSubstringRoleVoter;
 
-  @Before
+  @BeforeEach
   public void init() {
     pentahoSubstringRoleVoter = new PentahoSubstringRoleVoter( PREFIX );
   }

@@ -19,9 +19,9 @@
  */
 package org.pentaho.platform.util.web;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.pentaho.di.core.util.Assert.assertNull;
 
 public class MimeHelperTest {

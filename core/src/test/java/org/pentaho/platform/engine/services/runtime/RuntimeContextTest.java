@@ -20,8 +20,8 @@
 
 package org.pentaho.platform.engine.services.runtime;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -69,7 +69,7 @@ public class RuntimeContextTest {
 
   private IRuntimeContext runtimeCtx;
 
-  @Before
+  @BeforeEach
   public void before() {
     mockedRuntimeRepository = mock( IRuntimeRepository.class );
     mockedSolutionEngine = mock( ISolutionEngine.class );

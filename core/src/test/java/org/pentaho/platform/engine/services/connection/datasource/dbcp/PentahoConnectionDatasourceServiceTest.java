@@ -20,9 +20,9 @@
 
 package org.pentaho.platform.engine.services.connection.datasource.dbcp;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runners.Parameterized;
 import org.mockito.Mockito;
 import org.pentaho.database.model.DatabaseAccessType;
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.*;
 /**
  * Created by gmoran on 5/2/14.
  */
-@RunWith(Parameterized.class)
+@ExtendWith(Parameterized.class)
 public class PentahoConnectionDatasourceServiceTest {
 
   private BaseDatasourceService service;
@@ -59,7 +59,7 @@ public class PentahoConnectionDatasourceServiceTest {
     } );
   }
 
-  @Before
+  @BeforeEach
   public void setUp(){
 
     mockConnection = mock(IDatabaseConnection.class);

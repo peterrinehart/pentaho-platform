@@ -21,8 +21,8 @@
 package org.pentaho.platform.engine.services;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.pentaho.platform.api.engine.ActionSequenceException;
@@ -54,7 +54,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -76,7 +76,7 @@ public class MessageFormatterTest {
 
   private IRuntimeContext runtimeCtx;
 
-  @Before
+  @BeforeEach
   public void before() {
     applicationContext = new StandaloneApplicationContext( ".", "" );
     aggregateObjectFactory = new AggregateObjectFactory();

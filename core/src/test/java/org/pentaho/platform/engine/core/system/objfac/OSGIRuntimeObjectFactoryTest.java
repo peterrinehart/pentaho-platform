@@ -20,8 +20,8 @@
 
 package org.pentaho.platform.engine.core.system.objfac;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -36,9 +36,9 @@ import org.pentaho.platform.engine.core.system.objfac.references.SingletonPentah
 import java.util.Collections;
 import java.util.Dictionary;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -56,7 +56,7 @@ public class OSGIRuntimeObjectFactoryTest {
   @Mock
   private BundleContext bundleContext;
 
-  @Before
+  @BeforeEach
   public void setup() {
     objectFactory = new OSGIRuntimeObjectFactory();
     MockitoAnnotations.initMocks( this );

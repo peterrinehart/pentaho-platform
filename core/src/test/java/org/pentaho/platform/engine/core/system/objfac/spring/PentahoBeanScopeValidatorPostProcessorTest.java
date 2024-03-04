@@ -23,7 +23,7 @@ package org.pentaho.platform.engine.core.system.objfac.spring;
 import java.util.Arrays;
 
 import org.apache.commons.lang.StringUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pentaho.test.platform.engine.core.BaseTest;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;

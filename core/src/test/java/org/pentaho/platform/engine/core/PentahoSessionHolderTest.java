@@ -20,8 +20,8 @@
 
 package org.pentaho.platform.engine.core;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
@@ -30,12 +30,12 @@ import org.pentaho.platform.engine.core.system.StandaloneSession;
 import java.util.Hashtable;
 import java.util.Map;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 
-@RunWith( MockitoJUnitRunner.class )
+@ExtendWith( MockitoJUnitRunner.class )
 public class PentahoSessionHolderTest {
   static Map<Thread, Boolean> threadFailureMap = new Hashtable<>();
 

@@ -26,8 +26,8 @@ import static junit.framework.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.api.engine.IMimeTypeListener;
 import org.pentaho.platform.api.engine.IPentahoDefinableObjectFactory;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
@@ -44,7 +44,7 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  */
 public class AggregateObjectFactoryTest {
 
-  @Before
+  @BeforeEach
   public void setup() {
     PentahoSystem.clearObjectFactory();
   }

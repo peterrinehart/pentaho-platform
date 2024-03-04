@@ -20,31 +20,16 @@
 
 package org.pentaho.platform.engine.services.connection.datasource.dbcp;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.HashMap;
-import java.util.Properties;
-
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.dbcp2.ConnectionFactory;
 import org.apache.commons.dbcp2.DriverManagerConnectionFactory;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.pentaho.database.DatabaseDialectException;
 import org.pentaho.database.IDatabaseDialect;
 import org.pentaho.database.IDriverLocator;
@@ -60,9 +45,21 @@ import org.pentaho.platform.api.data.DBDatasourceServiceException;
 import org.pentaho.test.platform.engine.core.MicroPlatform;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
+import java.util.Properties;
 
-@RunWith( MockitoJUnitRunner.class )
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith( MockitoExtension.class )
 public class PooledDatasourceHelperTest {
   private static final String SOLUTION_PATH = "src/test/resources/solution";
   private MicroPlatform       mp;
@@ -83,7 +80,7 @@ public class PooledDatasourceHelperTest {
   private final String user             = "us&r!";
   private final String password         = "pass&word&!&amp;";
 
-  @Before
+  @BeforeEach
   public void before() throws DatabaseDialectException {
     when( dialectService.getDialect( connection ) ).thenReturn( driverLocatorDialect );
     when( connection.getDatabaseType() ).thenReturn( databaseType );
@@ -239,7 +236,7 @@ public class PooledDatasourceHelperTest {
       PooledDatasourceHelper.convert( connection, () -> dialectService );
       fail( "Expected exception" );
     } catch ( Exception e ) {
-      assertThat( e.getMessage(), containsString( nativeDriverName ) );
+      assertTrue( e.getMessage().contains( nativeDriverName ) );
     }
   }
 
@@ -261,9 +258,9 @@ public class PooledDatasourceHelperTest {
     DriverManagerDataSource dataSource =
         (DriverManagerDataSource) PooledDatasourceHelper.convert( connection, () -> dialectService );
     verify( ( (IDriverLocator) driverLocatorDialect ), times( 1 ) ).initialize( nativeDriverName );
-    assertThat( dataSource.getUrl(), is( jdbcUrl ) );
-    assertThat( dataSource.getUsername(), is( "suzy" ) );
-    assertThat( dataSource.getPassword(), is( "password" ) );
+    assertTrue( jdbcUrl.equals( dataSource.getUrl() ) );
+    assertTrue( "suzy".equals( dataSource.getUsername() ) );
+    assertTrue( "password".equals( dataSource.getPassword() ) );
   }
 
   @Test
@@ -273,8 +270,8 @@ public class PooledDatasourceHelperTest {
       PooledDatasourceHelper.convert( connection, () -> dialectService );
       fail( "Expected exception, driver class should not be present." );
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( DBDatasourceServiceException.class ) );
-      assertThat( e.getCause().getMessage(), containsString( nativeDriverName ) );
+      assertTrue( DBDatasourceServiceException.class.isInstance( e ) );
+      assertTrue( e.getCause().getMessage().contains( nativeDriverName ) );
     }
   }
 
@@ -286,7 +283,7 @@ public class PooledDatasourceHelperTest {
       PooledDatasourceHelper.convert( connection, () -> dialectService );
       fail( "Expected exception, driver class not specified in dialect." );
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( DBDatasourceServiceException.class ) );
+      assertTrue( DBDatasourceServiceException.class.isInstance( e ) );
     }
   }
 
@@ -296,15 +293,15 @@ public class PooledDatasourceHelperTest {
       PooledDatasourceHelper.convert( connection, () -> null );
       fail( "Expected an exception.  No dialect service." );
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( DBDatasourceServiceException.class ) );
+      assertTrue( DBDatasourceServiceException.class.isInstance( e ) );
     }
   }
 
-  @Test( expected = DriverNotInitializedException.class )
+  @Test
   public void testDriverNotInitialized() throws DBDatasourceServiceException {
     when( dialectService.getDialect( connection ) ).thenReturn( driverLocatorDialect );
     when( ( (IDriverLocator) driverLocatorDialect ).initialize( nativeDriverName ) ).thenReturn( false );
-    PooledDatasourceHelper.convert( connection, () -> dialectService );
+    assertThrows( DriverNotInitializedException.class, () -> PooledDatasourceHelper.convert( connection, () -> dialectService ) );
   }
 
   @Test

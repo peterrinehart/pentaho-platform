@@ -20,9 +20,9 @@
 
 package org.pentaho.platform.engine.core.system.status;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +38,8 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.api.engine.IServerStatusProvider;
 
 /**
@@ -54,7 +54,7 @@ public class PeriodicStatusLoggerTest {
   private static Logger logger;
   IServerStatusProvider serverStatusProvider;
 
-  @Before
+  @BeforeEach
   public void setup() {
     logger = LogManager.getRootLogger();
     appender = new TestAppender();

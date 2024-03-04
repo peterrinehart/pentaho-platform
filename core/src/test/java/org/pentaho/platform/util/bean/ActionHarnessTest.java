@@ -21,8 +21,8 @@
 package org.pentaho.platform.util.bean;
 
 import junit.framework.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.api.action.IAction;
 import org.pentaho.platform.api.action.IVarArgsAction;
 import org.pentaho.platform.util.beans.ActionHarness;
@@ -34,7 +34,7 @@ import java.util.Map;
 @SuppressWarnings( "nls" )
 public class ActionHarnessTest {
 
-  @Before
+  @BeforeEach
   public void init() {
 
   }

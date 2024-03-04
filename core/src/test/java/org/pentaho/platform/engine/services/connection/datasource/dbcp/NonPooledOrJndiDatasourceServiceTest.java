@@ -20,8 +20,8 @@
 
 package org.pentaho.platform.engine.services.connection.datasource.dbcp;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pentaho.database.model.DatabaseAccessType;
 import org.pentaho.database.model.IDatabaseConnection;
 import org.pentaho.platform.api.data.DBDatasourceServiceException;
@@ -51,7 +51,7 @@ public class NonPooledOrJndiDatasourceServiceTest {
   DataSource databaseConnectionDataSource;
 
 
-  @Before
+  @BeforeEach
   public void init() {
     mgmtService = mock( IDatasourceMgmtService.class );
     connection = mock( IDatabaseConnection.class );

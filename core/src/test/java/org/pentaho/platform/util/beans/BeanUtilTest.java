@@ -20,7 +20,7 @@
 
 package org.pentaho.platform.util.beans;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pentaho.di.core.util.Assert;
 
 public class BeanUtilTest {

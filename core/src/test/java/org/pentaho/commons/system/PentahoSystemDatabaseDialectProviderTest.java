@@ -20,11 +20,11 @@
 
 package org.pentaho.commons.system;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.pentaho.database.IDatabaseDialect;
 import org.pentaho.database.dialect.AbstractDatabaseDialect;
 import org.pentaho.database.model.IDatabaseType;
@@ -36,16 +36,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * Created by bryan on 5/10/16.
  */
-@RunWith( MockitoJUnitRunner.class )
+@ExtendWith( MockitoExtension.class )
 public class PentahoSystemDatabaseDialectProviderTest {
   @Mock AbstractDatabaseDialect unusableDatabaseDialect;
   @Mock IDatabaseType unusableDatabaseType;
@@ -58,7 +58,7 @@ public class PentahoSystemDatabaseDialectProviderTest {
   List<IDatabaseDialect> databaseDialects;
   PentahoSystemDatabaseDialectProvider pentahoSystemDatabaseDialectProvider;
 
-  @Before
+  @BeforeEach
   public void setup() {
     when( unusableDatabaseDialect.getDatabaseType() ).thenReturn( unusableDatabaseType );
     when( unusableDatabaseDialect.isUsable() ).thenReturn( false );

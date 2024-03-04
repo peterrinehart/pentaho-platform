@@ -20,7 +20,7 @@
 
 package org.pentaho.platform.util.xml.dom4j;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.TransformerFactoryConfigurationError;
 

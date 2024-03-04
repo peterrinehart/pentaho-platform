@@ -20,17 +20,17 @@
 
 package org.pentaho.platform.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 
 public class Base64PasswordServiceTest {
   private Base64PasswordService service;
   private String res;
 
-  @Before
+  @BeforeEach
   public void setUp( ) {
     service = new Base64PasswordService();
   }

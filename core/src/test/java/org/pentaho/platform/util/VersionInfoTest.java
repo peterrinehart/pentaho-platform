@@ -20,8 +20,8 @@
 
 package org.pentaho.platform.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the {@link org.pentaho.platform.util.VersionInfo} class.

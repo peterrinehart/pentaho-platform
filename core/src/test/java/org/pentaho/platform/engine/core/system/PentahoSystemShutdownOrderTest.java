@@ -21,8 +21,8 @@
 package org.pentaho.platform.engine.core.system;
 
 
-import org.junit.Test;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.pentaho.platform.api.engine.IPentahoSystemListener;
 
 import java.util.ArrayList;

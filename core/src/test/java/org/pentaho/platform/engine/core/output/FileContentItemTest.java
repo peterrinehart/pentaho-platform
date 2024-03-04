@@ -29,22 +29,22 @@ import java.io.Writer;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class FileContentItemTest {
   static File tempOutFile;
   FileContentItem fci;
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws IOException {
     tempOutFile = File.createTempFile( "FileContentItemTest", "out" );
     tempOutFile.delete();
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     Assert.assertFalse( "tempOutFile exists", tempOutFile.exists() );
   }

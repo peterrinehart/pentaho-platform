@@ -20,9 +20,9 @@
 
 package org.pentaho.platform.util.client;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -30,8 +30,8 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.pentaho.commons.util.repository.exception.FolderNotValidException;
 import org.pentaho.commons.util.repository.exception.InvalidArgumentException;
@@ -61,7 +61,7 @@ public class BiPlatformRepositoryClientNavigationServiceTest {
   private Document document;
   private Element mockElement;
 
-  @Before
+  @BeforeEach
   public void setup() {
     mockDocument = Mockito.mock( Document.class );
     navService = new BiPlatformRepositoryClientNavigationService();

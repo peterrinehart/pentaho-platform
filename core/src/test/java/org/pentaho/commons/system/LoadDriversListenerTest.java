@@ -20,7 +20,7 @@
 
 package org.pentaho.commons.system;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pentaho.di.core.util.Assert;
 
 import java.sql.Connection;
