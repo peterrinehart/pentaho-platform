@@ -20,7 +20,7 @@
 
 package org.pentaho.platform.api.engine;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static junit.framework.TestCase.assertEquals;
 

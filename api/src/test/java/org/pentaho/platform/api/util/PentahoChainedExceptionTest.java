@@ -20,13 +20,13 @@
 
 package org.pentaho.platform.api.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PentahoChainedExceptionTest {
   private static final String CAUSE_MSG = "Root cause";

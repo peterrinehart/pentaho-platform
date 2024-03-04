@@ -20,11 +20,11 @@
 
 package org.pentaho.platform.api.engine;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Constructor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.api.repository.ContentException;
 
 public class PlatformPluginRegistrationExceptionTest {

@@ -20,12 +20,12 @@
 
 package org.pentaho.platform.api.test;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pentaho.platform.api.engine.ActionExecutionException;
 
 import java.lang.reflect.Constructor;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Created by bgroves on 11/6/15.

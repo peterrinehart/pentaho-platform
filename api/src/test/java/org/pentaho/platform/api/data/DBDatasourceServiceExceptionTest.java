@@ -21,7 +21,7 @@
 package org.pentaho.platform.api.data;
 
 import static org.pentaho.platform.api.test.ExceptionTester.hasValidExceptionConstructors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DBDatasourceServiceExceptionTest {
 

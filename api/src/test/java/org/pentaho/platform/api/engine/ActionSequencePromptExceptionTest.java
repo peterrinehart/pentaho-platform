@@ -20,11 +20,11 @@
 
 package org.pentaho.platform.api.engine;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.pentaho.actionsequence.dom.IActionDefinition;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.pentaho.platform.api.test.ExceptionTester.hasValidExceptionConstructors;
 
 import java.lang.reflect.Constructor;

@@ -19,6 +19,7 @@
     <commons-xul.version>10.2.0.0-SNAPSHOT</commons-xul.version>
     <commons-database.version>10.2.0.0-SNAPSHOT</commons-database.version>
     <pentaho-osgi-bundles.version>10.2.0.0-SNAPSHOT</pentaho-osgi-bundles.version>
+    <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
   </properties>
   <dependencies>
     <dependency>
@@ -140,9 +141,9 @@
     </dependency>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
