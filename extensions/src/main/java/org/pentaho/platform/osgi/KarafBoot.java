@@ -14,7 +14,7 @@
  * See the GNU Lesser General Public License for more details.
  *
  *
- * Copyright (c) 2002 - 2022 Hitachi Vantara. All rights reserved.
+ * Copyright (c) 2002 - 2024 Hitachi Vantara. All rights reserved.
  *
  */
 package org.pentaho.platform.osgi;
@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.AbstractFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.karaf.main.Main;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPentahoSystemListener;
@@ -40,10 +41,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -58,6 +61,7 @@ public class KarafBoot implements IPentahoSystemListener {
   private Main main;
   private KarafInstance karafInstance;
   private Properties karafCustomProperties;
+  private FileLock karafBootFileLock;
 
   Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -129,6 +133,7 @@ public class KarafBoot implements IPentahoSystemListener {
         transientRoot = true;
       }
 
+      waitForBootLock();
       final File destDir;
       if ( transientRoot ) {
         if ( rootCopyFolderString == null ) {
@@ -497,5 +502,58 @@ public class KarafBoot implements IPentahoSystemListener {
     } catch ( Exception e ) {
       logger.error( "Error stopping Karaf", e );
     }
+  }
+
+  /**
+   * Ensures no other karaf instances are starting at the same time.  This can cause problems when using an alternative
+   * karaf root and several instances of kitchen/pan are starting at once.
+   * @throws InterruptedException
+   */
+  @VisibleForTesting
+  boolean waitForBootLock() throws InterruptedException{
+    boolean success = false;
+    try {
+      String tempDir = System.getProperty( "java.io.tmpdir" );
+      long bootWaitTime = 300000;
+      try {
+        bootWaitTime = Long.parseLong( System.getProperty( Const.KARAF_BOOT_LOCK_WAIT_TIME, "300000" ) );
+      } catch ( NumberFormatException e ) {
+        logger.warn( String.format( "Error parsing value of %s, using default 5 minutes", Const.KARAF_BOOT_LOCK_WAIT_TIME ), e );
+      }
+      long waitTimeUp = System.currentTimeMillis() + bootWaitTime;
+      File lockFile = new File( Paths.get( tempDir, Const.KARAF_BOOT_LOCK_FILE ).toUri() );
+      // wait until the lock file is gone or we run out of time
+      logger.debug( "Waiting for karaf boot lock..." );
+      while( lockFile.exists() && System.currentTimeMillis() < waitTimeUp ) {
+        Thread.sleep( 1000 );
+      }
+      if ( lockFile.exists() ) {
+        logger.warn( String.format( "Karaf boot lock timed out, but lock file %s still present.  Proceeding anyway. Please remove any stale lock file.", lockFile.getAbsolutePath() ) );
+      } else if ( lockFile.createNewFile() ) {
+        // createNewFile should be atomic, so we should be safe
+        logger.info( "Karaf boot lock secured." );
+        // deleteOnExit only works if the JVM shuts down normally and we shouldn't need it, but we might as well set it anyway
+        lockFile.deleteOnExit();
+        // lock the file to prevent other processes from stepping on it
+        karafBootFileLock = FileChannel.open( lockFile.toPath(), Set.of( StandardOpenOption.WRITE ) ).lock();
+        success = true;
+      } else {
+        // another process got here first and created the file before we could; start waiting again because we know
+        logger.debug( "Karaf boot lock claimed by another process, waiting again..." );
+        waitForBootLock();
+      }
+    } catch ( InterruptedException e ) {
+      logger.error( "Caught interrupted exception waiting for karaf boot file lock", e );
+      if ( Thread.interrupted() ) {
+        throw new InterruptedException();
+      }
+    } catch ( IOException e ) {
+      logger.warn( "Exception trying to get karaf boot file lock; proceeding anyway", e );
+    }
+    return success;
+  }
+
+  FileLock getKarafBootFileLock() {
+    return karafBootFileLock;
   }
 }

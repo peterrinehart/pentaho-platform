@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Constants;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.platform.api.engine.IApplicationContext;
 import org.pentaho.platform.api.engine.IPentahoSession;
@@ -77,6 +78,7 @@ public class KarafBootTest {
   KarafInstance karafInstance;
 
   static File tmpDir;
+  static File lockFile = new File( Paths.get( System.getProperty( "java.io.tmpdir" ), Const.KARAF_BOOT_LOCK_FILE ).toUri() );
 
   @BeforeClass
   public static void init() throws Exception {
@@ -95,6 +97,7 @@ public class KarafBootTest {
     try ( FileOutputStream fileOutputStream = new FileOutputStream( configProps ) ) {
       props.store( fileOutputStream, "Minimal properties for test KarafBoot without issue" );
     }
+    System.setProperty( Const.KARAF_BOOT_LOCK_WAIT_TIME, "3000" );
   }
 
   @AfterClass
@@ -109,12 +112,15 @@ public class KarafBootTest {
     PentahoSystem.setApplicationContext( appContext );
     when( appContext.getSolutionRootPath() ).thenReturn( tmpDir.getPath() );
     boot = spy( new KarafBoot() );
+    // ensure no boot lock exists
+    lockFile.delete();
   }
 
   @After
   public void tearDown() throws Exception {
     PentahoSystem.clearObjectFactory();
     boot.shutdown();
+    lockFile.delete();
   }
 
   @Test
@@ -403,6 +409,17 @@ public class KarafBootTest {
     } catch ( IOException e ) {
       fail( "Couldn't create file to test deleteRecursiveIfExists()" );
     }
+  }
+
+  @Test
+  public void verifyBootLockFailureBehavior() throws Exception {
+    assertTrue( lockFile.createNewFile() );
+    assertFalse( boot.waitForBootLock() );
+  }
+
+  @Test
+  public void verifyBootLockSuccessBehavior() throws Exception {
+    assertTrue( boot.waitForBootLock() );
   }
 
   private boolean isOSX() {
