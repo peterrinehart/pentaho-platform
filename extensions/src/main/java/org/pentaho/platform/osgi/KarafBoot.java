@@ -61,7 +61,8 @@ public class KarafBoot implements IPentahoSystemListener {
   private Main main;
   private KarafInstance karafInstance;
   private Properties karafCustomProperties;
-  private FileLock karafBootFileLock;
+  private static FileLock karafBootFileLock;
+  private static File lockFile;
 
   Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -521,7 +522,7 @@ public class KarafBoot implements IPentahoSystemListener {
         logger.warn( String.format( "Error parsing value of %s, using default 5 minutes", Const.KARAF_BOOT_LOCK_WAIT_TIME ), e );
       }
       long waitTimeUp = System.currentTimeMillis() + bootWaitTime;
-      File lockFile = new File( Paths.get( tempDir, Const.KARAF_BOOT_LOCK_FILE ).toUri() );
+      lockFile = new File( Paths.get( tempDir, Const.KARAF_BOOT_LOCK_FILE ).toUri() );
       // wait until the lock file is gone or we run out of time
       logger.debug( "Waiting for karaf boot lock..." );
       while( lockFile.exists() && System.currentTimeMillis() < waitTimeUp ) {
@@ -551,6 +552,14 @@ public class KarafBoot implements IPentahoSystemListener {
       logger.warn( "Exception trying to get karaf boot file lock; proceeding anyway", e );
     }
     return success;
+  }
+
+  public static File getLockFile() {
+    return lockFile;
+  }
+
+  public static FileLock getLockFileLock() {
+    return karafBootFileLock;
   }
 
   FileLock getKarafBootFileLock() {
