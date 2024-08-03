@@ -528,6 +528,8 @@ public class KarafBoot implements IPentahoSystemListener {
       while( lockFile.exists() && System.currentTimeMillis() < waitTimeUp ) {
         Thread.sleep( 1000 );
       }
+      // todo: look for spoon processes and check if the pid in the lock file matches a running process
+      // todo: put pid in lock file name
       if ( lockFile.exists() ) {
         logger.warn( String.format( "Karaf boot lock timed out, but lock file %s still present.  Proceeding anyway. Please remove any stale lock file.", lockFile.getAbsolutePath() ) );
       } else if ( lockFile.createNewFile() ) {
