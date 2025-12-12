@@ -19,6 +19,7 @@ import org.apache.jackrabbit.core.SessionImpl;
 import org.apache.jackrabbit.core.cache.GrowingLRUMap;
 import org.apache.jackrabbit.core.id.NodeId;
 import org.apache.jackrabbit.core.security.authorization.AccessControlModifications;
+import org.apache.jackrabbit.core.security.authorization.acl.EntryCollector.Entries;
 import org.pentaho.platform.api.engine.ICacheManager;
 import org.pentaho.platform.api.engine.ILogoutListener;
 import org.pentaho.platform.api.engine.IPentahoSession;
@@ -28,7 +29,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.security.AccessControlEntry;
+
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,6 +98,7 @@ public class CachingPentahoEntryCollector extends PentahoEntryCollector {
 
   private EntryCache getCache() {
     IPentahoSession session = PentahoSessionHolder.getSession();
+    log.debug( "Getting cache for session {}", session.getId() );
     EntryCache cache = (EntryCache) cacheManager.getFromSessionCache( session, ENTRY_COLLECTOR );
     if ( cache == null ) {
       cache = new EntryCache();
@@ -469,7 +475,7 @@ public class CachingPentahoEntryCollector extends PentahoEntryCollector {
       }
 
       if ( result != null ) {
-        log.debug( "Cache hit for nodeId {}", id );
+        log.debug( "Cache hit for nodeId {}, entries={}", id, entriesToString((PentahoEntries)result, new StringBuilder()) );
       } else {
         log.debug( "Cache miss for nodeId {}", id );
       }
@@ -477,8 +483,29 @@ public class CachingPentahoEntryCollector extends PentahoEntryCollector {
       return result;
     }
 
+    private String entriesToString( PentahoEntries entries, StringBuilder sb ) {
+      sb.append( "Entries[nextId=" ).append( entries.getNextId() ).append( ", aces=[" );
+      List<PentahoEntry> aces = entries.getACEs();
+      for ( int i = 0; i < aces.size(); i++ ) {
+        sb.append( aces.get(i).getPrincipalName() );
+        sb.append( ":" );
+        sb.append( aces.get(i).getPrivilegeBits().toString() );
+        sb.append( ":" );
+        sb.append( aces.get(i).isAllow() ? "allow" : "deny" );
+        sb.append( ":" );
+        sb.append( aces.get(i).isGroupEntry() ? "isGroup" : "notGroup" );
+        sb.append( ":" );
+        sb.append( aces.get(i).hasRestrictions() ? "hasRestrictions" : "noRestrictions" );
+        if ( i < aces.size() - 1 ) {
+          sb.append( ", " );
+        }
+      } 
+      sb.append( "]]" );
+      return sb.toString();
+    }
+
     public void put( NodeId id, Entries entries ) {
-      log.debug( "Updating cache for nodeId {}", id );
+      log.debug( "Updating cache for nodeId {}, entries={}", id, entriesToString((PentahoEntries)entries, new StringBuilder()) );
 
       // fail early on potential cache corruption
       if ( id.equals( entries.getNextId() ) ) {

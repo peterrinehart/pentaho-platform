@@ -24,6 +24,7 @@ import java.util.Properties;
 import jakarta.jws.WebService;
 
 import org.pentaho.platform.api.engine.IAuthorizationPolicy;
+import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileAce;
@@ -38,6 +39,7 @@ import org.pentaho.platform.api.repository2.unified.webservices.RepositoryFileTr
 import org.pentaho.platform.api.repository2.unified.webservices.RepositoryFileAclAceDto;
 import org.pentaho.platform.api.repository2.unified.webservices.VersionSummaryDto;
 import org.pentaho.platform.api.repository2.unified.webservices.StringKeyStringValueDto;
+import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.repository2.locale.PentahoLocale;
 import org.pentaho.platform.security.policy.rolebased.actions.AdministerSecurityAction;
@@ -433,6 +435,14 @@ public class DefaultUnifiedRepositoryWebService implements IUnifiedRepositoryWeb
     // TODO Auto-generated method stub
     return repositoryFileAdapter
         .marshal( repo.updateFolder( repositoryFileAdapter.unmarshal( folder ), versionMessage ) );
+  }
+
+  @Override
+  public void logout() {
+    IPentahoSession userSession = PentahoSessionHolder.getSession();
+    PentahoSystem.invokeLogoutListeners( userSession );
+    // removeSession call here is analogous to clearContext call in SecurityContextLogoutHandler
+    PentahoSessionHolder.removeSession();
   }
 
 }
