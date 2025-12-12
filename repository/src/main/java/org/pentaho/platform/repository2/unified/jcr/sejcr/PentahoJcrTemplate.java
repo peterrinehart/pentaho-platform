@@ -61,8 +61,6 @@ public class PentahoJcrTemplate extends JcrTemplate {
     Session session = null;
     try {
       session = getSession();
-      LOG.debug(String.format("Session acquired  " + session.getUserID() + " " + session.getClass().getName() + " usage count %s",
-        getUsageCount( session ).get() ) );
       useSession( session );
 
       Session sessionToExpose = ( exposeNativeSession ? session : createSessionProxy( session ) );
