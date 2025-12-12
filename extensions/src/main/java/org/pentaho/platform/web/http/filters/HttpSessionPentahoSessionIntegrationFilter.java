@@ -254,11 +254,15 @@ public class HttpSessionPentahoSessionIntegrationFilter implements Filter, Initi
 
       if ( logger.isDebugEnabled() ) {
         logger.debug( "Found no IPentahoSession in HTTP session; created new IPentahoSession" );
+        logger.debug( String.format( "New session created %s %s %s ", pentahoSessionBeforeChainExecution.getId(),
+          pentahoSessionBeforeChainExecution.getName(), pentahoSessionBeforeChainExecution.getActionName() ) );
       }
     } else {
       if ( logger.isDebugEnabled() ) {
         logger.debug( "Obtained a valid IPentahoSession from HTTP session to "
           + "associate with PentahoSessionHolder: '" + pentahoSessionBeforeChainExecution + "'" );
+        logger.debug( String.format( "Existing session %s %s %s ", pentahoSessionBeforeChainExecution.getId(),
+          pentahoSessionBeforeChainExecution.getName(), pentahoSessionBeforeChainExecution.getActionName() ) );
       }
     }
 

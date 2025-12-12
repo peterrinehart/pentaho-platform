@@ -361,6 +361,8 @@ public class JcrRepositoryFileDao implements IRepositoryFileDao {
     Assert.hasText( relPath, "Relative path must not be null or empty" );
     Assert.isTrue( relPath.startsWith( RepositoryFile.SEPARATOR ), "Relative path must start with a separator" );
 
+    logger.debug(String.format("getFile %s %s %s, PentahoSession %s", relPath, loadLocaleMaps, locale != null ? locale.getLocale().toString() : "null", PentahoSessionHolder.getSession() != null ? PentahoSessionHolder.getSession().getId() : "null"));
+
     return (RepositoryFile) jcrTemplate.execute( new JcrCallback() {
       @Override
       public Object doInJcr( final Session session ) throws RepositoryException, IOException {
