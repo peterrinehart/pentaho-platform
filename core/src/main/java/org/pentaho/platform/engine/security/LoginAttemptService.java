@@ -17,9 +17,11 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.pentaho.platform.api.security.ILoginAttemptService;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 public class LoginAttemptService implements ILoginAttemptService {
 
@@ -62,5 +64,36 @@ public class LoginAttemptService implements ILoginAttemptService {
     } catch ( ExecutionException e ) {
       return false;
     }
+  }
+
+  /**
+   * Get all entries in the attempts cache
+   * @return Map of all cache entries
+   */
+  public Map<String, Integer> getAllAttempts() {
+    return attemptsCache.asMap();
+  }
+
+  /**
+   * Remove a specific key from the cache
+   * @param key the key to remove
+   */
+  public void removeFromCache( String key ) {
+    attemptsCache.invalidate( key );
+  }
+
+  /**
+   * Clear all entries from the cache
+   */
+  public void clearCache() {
+    attemptsCache.invalidateAll();
+  }
+
+  /**
+   * Get the maximum number of allowed attempts
+   * @return maximum attempts
+   */
+  public int getMaxAttempt() {
+    return maxAttempt;
   }
 }
