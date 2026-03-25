@@ -13,6 +13,17 @@
 
 package org.pentaho.platform.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,19 +39,9 @@ import org.pentaho.platform.api.scheduler2.IEmailGroupResolver;
 import org.pentaho.platform.api.util.QuartzActionUtil;
 import org.pentaho.platform.api.workitem.IWorkItemLifecycleEventPublisher;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.pentaho.platform.engine.services.solution.StandardSettings;
 import org.pentaho.platform.util.messages.Messages;
 import org.pentaho.platform.util.web.MimeHelper;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
 
 public class ActionUtil {
 
@@ -611,7 +612,7 @@ public class ActionUtil {
     if ( actionParams == null ) {
       return null;
     }
-    final Object value = actionParams.get( "jobName" );
+    final Object value = actionParams.get( StandardSettings.SCHEDULE_NAME );
     return value != null ? value.toString().trim() : null;
   }
 
