@@ -31,11 +31,16 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.util.messages.Messages;
 import org.pentaho.platform.util.web.MimeHelper;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
 public class ActionUtil {
 
@@ -71,6 +76,17 @@ public class ActionUtil {
   public static final String INVOKER_ASYNC_EXEC = "async"; //$NON-NLS-1$
   public static final String INVOKER_DEFAULT_ASYNC_EXEC_VALUE = "true"; //$NON-NLS-1$
   public static final String INVOKER_SYNC_VALUE = "false";
+
+  public static final String SCH_EMAIL_TO = "_SCH_EMAIL_TO";
+  public static final String SCH_EMAIL_CC = "_SCH_EMAIL_CC";
+  public static final String SCH_EMAIL_BCC = "_SCH_EMAIL_BCC";
+  public static final String SCH_EMAIL_SUBJECT = "_SCH_EMAIL_SUBJECT";
+  public static final String SCH_EMAIL_MESSAGE = "_SCH_EMAIL_MESSAGE";
+
+  private static final String SCHEDULER_FAILURE_EMAIL_ENABLED_PROPERTY = "scheduler.failure.email.enabled";
+  private static final boolean SCHEDULER_FAILURE_EMAIL_ENABLED_DEFAULT = false;
+
+  static final String SCHEDULER_FAILURE_EMAIL_PROPERTIES = "system/scheduler_failure_email.properties";
 
   public static final String WORK_ITEM_UID = "workItemUid"; //$NON-NLS-1$
   public static final String WORK_ITEM_NAME = "workItemName"; //$NON-NLS-1$
@@ -434,9 +450,9 @@ public class ActionUtil {
         addAttachment( actionParams, params, filePath, emailer );
       }
 
-      String to = (String) actionParams.get( "_SCH_EMAIL_TO" );
-      String cc = (String) actionParams.get( "_SCH_EMAIL_CC" );
-      String bcc = (String) actionParams.get( "_SCH_EMAIL_BCC" );
+      String to = (String) actionParams.get( SCH_EMAIL_TO );
+      String cc = (String) actionParams.get( SCH_EMAIL_CC );
+      String bcc = (String) actionParams.get( SCH_EMAIL_BCC );
       if ( ( to == null || "".equals( to ) ) && ( cc == null || "".equals( cc ) )
           && ( bcc == null || "".equals( bcc ) ) ) {
         // no destination
@@ -458,13 +474,13 @@ public class ActionUtil {
         if (resolveBCCList != null && resolveBCCList.length() > 0) {
           emailer.setBcc( resolveBCCList );
         }
-        String subject = ( String ) actionParams.get( "_SCH_EMAIL_SUBJECT" );
+        String subject = ( String ) actionParams.get( SCH_EMAIL_SUBJECT );
         if (subject != null && !"".equals( subject ) ) {
           emailer.setSubject( subject );
         } else {
           emailer.setSubject( "Pentaho Scheduler" + ( emailer.getAttachmentName() != null ? " : " + emailer.getAttachmentName() : "" ) );
         }
-        String message = (String) actionParams.get( "_SCH_EMAIL_MESSAGE" );
+        String message = (String) actionParams.get( SCH_EMAIL_MESSAGE );
         if ( subject != null && !"".equals( subject ) ) {
           emailer.setBody( message );
         }
@@ -475,6 +491,146 @@ public class ActionUtil {
     } catch ( Exception e ) {
       logger.warn( e.getMessage(), e );
     }
+  }
+
+  /**
+   * Sends a scheduler failure email (without attachment) to the same destination fields used by scheduler success
+   * emails. This method is intentionally best-effort and never throws.
+   *
+   * @param actionParams the scheduler action params
+   * @param failureCause the failure that occurred, may be null
+   */
+  public static void sendFailureEmail( Map<String, Object> actionParams, Throwable failureCause ) {
+    if ( actionParams == null || !isSchedulerFailureEmailEnabled() ) {
+      return;
+    }
+
+    try {
+      final Emailer emailer = new Emailer();
+      if ( !emailer.setup() ) {
+        logger.debug( "Failure email skipped: email is not configured." );
+        return;
+      }
+
+      IEmailGroupResolver emailGroupResolver = PentahoSystem.get( IEmailGroupResolver.class );
+      if ( emailGroupResolver == null ) {
+        emailGroupResolver = new DefaultEmailGroupResolver();
+      }
+
+      // Schedule recipients (from the job's own email settings)
+      final String to = (String) actionParams.get( SCH_EMAIL_TO );
+      final String cc = (String) actionParams.get( SCH_EMAIL_CC );
+      final String bcc = (String) actionParams.get( SCH_EMAIL_BCC );
+
+      // Admin recipients from system/scheduler_failure_email.properties
+      final Properties adminProps = loadAdminFailureEmailProperties();
+      final String adminTo = adminProps.getProperty( "ADMIN_TO", "" );
+      final String adminCc = adminProps.getProperty( "ADMIN_CC", "" );
+      final String adminBcc = adminProps.getProperty( "ADMIN_BCC", "" );
+
+      final String resolvedTo = mergeAddresses( emailGroupResolver.resolve( to ), adminTo );
+      final String resolvedCc = mergeAddresses( emailGroupResolver.resolve( cc ), adminCc );
+      final String resolvedBcc = mergeAddresses( emailGroupResolver.resolve( bcc ), adminBcc );
+
+      if ( StringUtils.isBlank( resolvedTo ) && StringUtils.isBlank( resolvedCc ) && StringUtils.isBlank( resolvedBcc ) ) {
+        logger.debug( "Failure email skipped: no destination provided (schedule or admin)." );
+        return;
+      }
+
+      emailer.setTo( resolvedTo );
+      emailer.setCc( resolvedCc );
+      emailer.setBcc( resolvedBcc );
+
+      String subject = buildFailureSubject( actionParams );
+      emailer.setSubject( subject );
+
+      final String configuredMessage = (String) actionParams.get( SCH_EMAIL_MESSAGE );
+      final StringBuilder messageBuilder = new StringBuilder();
+      if ( StringUtils.isBlank( configuredMessage ) ) {
+        messageBuilder.append( "The scheduled job failed." );
+      } else {
+        messageBuilder.append( configuredMessage ).append( "\n\n" ).append( "The scheduled job failed." );
+      }
+
+      final String failureText = extractFailureMessage( failureCause );
+      if ( !StringUtils.isBlank( failureText ) ) {
+        messageBuilder.append( "\nCause: " ).append( failureText );
+      }
+
+      emailer.setBody( messageBuilder.toString() );
+      emailer.send();
+    } catch ( Exception e ) {
+      logger.warn( "Could not send scheduler failure email.", e );
+    }
+  }
+
+  static Properties loadAdminFailureEmailProperties() {
+    final Properties props = new Properties();
+    try {
+      final String solutionPath = PentahoSystem.getApplicationContext().getSolutionPath( SCHEDULER_FAILURE_EMAIL_PROPERTIES );
+      if ( !StringUtils.isBlank( solutionPath ) ) {
+        final File file = new File( solutionPath );
+        if ( file.isFile() ) {
+          try ( InputStream in = new FileInputStream( file ) ) {
+            props.load( in );
+          }
+        }
+      }
+    } catch ( IOException | RuntimeException e ) {
+      logger.warn( "Could not load scheduler failure email admin properties.", e );
+    }
+    return props;
+  }
+
+  private static String mergeAddresses( final String a, final String b ) {
+    if ( StringUtils.isBlank( a ) ) {
+      return StringUtils.isBlank( b ) ? "" : b.trim();
+    }
+    if ( StringUtils.isBlank( b ) ) {
+      return a.trim();
+    }
+    return a.trim() + "," + b.trim();
+  }
+
+  private static boolean isSchedulerFailureEmailEnabled() {
+    final String value = PentahoSystem.getSystemSetting( SCHEDULER_FAILURE_EMAIL_ENABLED_PROPERTY,
+      String.valueOf( SCHEDULER_FAILURE_EMAIL_ENABLED_DEFAULT ) );
+    return Boolean.parseBoolean( value );
+  }
+
+  private static String buildFailureSubject( final Map<String, Object> actionParams ) {
+    final String scheduleName = extractScheduleName( actionParams );
+    if ( StringUtils.isBlank( scheduleName ) ) {
+      return "Schedule failed";
+    }
+
+    return "Schedule '" + scheduleName + "' failed";
+  }
+
+  private static String extractScheduleName( final Map<String, Object> actionParams ) {
+    if ( actionParams == null ) {
+      return null;
+    }
+    final Object value = actionParams.get( "jobName" );
+    return value != null ? value.toString().trim() : null;
+  }
+
+  private static String extractFailureMessage( Throwable failureCause ) {
+    if ( failureCause == null ) {
+      return null;
+    }
+
+    final String message = failureCause.getMessage();
+    if ( !StringUtils.isBlank( message ) ) {
+      return message;
+    }
+
+    final Throwable nestedCause = failureCause.getCause();
+    if ( nestedCause != null && !StringUtils.isBlank( nestedCause.getMessage() ) ) {
+      return nestedCause.getMessage();
+    }
+
+    return null;
   }
 
   private static void addAttachment( Map<String, Object> actionParams, Map<String, Object> params,
