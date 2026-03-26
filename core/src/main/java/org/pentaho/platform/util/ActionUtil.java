@@ -18,8 +18,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -42,6 +44,9 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.services.solution.StandardSettings;
 import org.pentaho.platform.util.messages.Messages;
 import org.pentaho.platform.util.web.MimeHelper;
+
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 
 public class ActionUtil {
 
@@ -88,6 +93,12 @@ public class ActionUtil {
   private static final boolean SCHEDULER_FAILURE_EMAIL_ENABLED_DEFAULT = false;
 
   static final String SCHEDULER_FAILURE_EMAIL_PROPERTIES = "system/scheduler_failure_email.properties";
+
+  /**
+   * Admin failure email properties loaded once at class initialization from
+   * {@value #SCHEDULER_FAILURE_EMAIL_PROPERTIES}. Changes to the file require a server restart to take effect.
+   */
+  static final Properties ADMIN_FAILURE_EMAIL_PROPERTIES = loadAdminFailureEmailProperties();
 
   public static final String WORK_ITEM_UID = "workItemUid"; //$NON-NLS-1$
   public static final String WORK_ITEM_NAME = "workItemName"; //$NON-NLS-1$
@@ -523,11 +534,10 @@ public class ActionUtil {
       final String cc = (String) actionParams.get( SCH_EMAIL_CC );
       final String bcc = (String) actionParams.get( SCH_EMAIL_BCC );
 
-      // Admin recipients from system/scheduler_failure_email.properties
-      final Properties adminProps = loadAdminFailureEmailProperties();
-      final String adminTo = adminProps.getProperty( "ADMIN_TO", "" );
-      final String adminCc = adminProps.getProperty( "ADMIN_CC", "" );
-      final String adminBcc = adminProps.getProperty( "ADMIN_BCC", "" );
+      // Admin recipients loaded once at startup from system/scheduler_failure_email.properties
+      final String adminTo = ADMIN_FAILURE_EMAIL_PROPERTIES.getProperty( "ADMIN_TO", "" );
+      final String adminCc = ADMIN_FAILURE_EMAIL_PROPERTIES.getProperty( "ADMIN_CC", "" );
+      final String adminBcc = ADMIN_FAILURE_EMAIL_PROPERTIES.getProperty( "ADMIN_BCC", "" );
 
       final String resolvedTo = mergeAddresses( emailGroupResolver.resolve( to ), adminTo );
       final String resolvedCc = mergeAddresses( emailGroupResolver.resolve( cc ), adminCc );
@@ -574,6 +584,9 @@ public class ActionUtil {
         if ( file.isFile() ) {
           try ( InputStream in = new FileInputStream( file ) ) {
             props.load( in );
+            for ( String key : new String[] { "ADMIN_TO", "ADMIN_CC", "ADMIN_BCC" } ) {
+              props.setProperty( key, filterValidAddresses( props.getProperty( key, "" ) ) );
+            }
           }
         }
       }
@@ -581,6 +594,26 @@ public class ActionUtil {
       logger.warn( "Could not load scheduler failure email admin properties.", e );
     }
     return props;
+  }
+
+  private static String filterValidAddresses( final String addresses ) {
+    if ( StringUtils.isBlank( addresses ) ) {
+      return "";
+    }
+    final List<String> valid = new ArrayList<>();
+    for ( final String addr : addresses.split( "," ) ) {
+      final String trimmed = addr.trim();
+      if ( StringUtils.isBlank( trimmed ) ) {
+        continue;
+      }
+      try {
+        InternetAddress.parse( trimmed, true );
+        valid.add( trimmed );
+      } catch ( AddressException e ) {
+        logger.warn( "Ignoring invalid admin failure email address: '" + trimmed + "'" );
+      }
+    }
+    return String.join( ",", valid );
   }
 
   private static String mergeAddresses( final String a, final String b ) {
