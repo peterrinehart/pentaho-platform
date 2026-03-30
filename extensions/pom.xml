@@ -9,7 +9,7 @@
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-platform-extensions</artifactId>
-  <version>11.0.0.0-237</version>
+  <version>11.0.0.0-C309</version>
   <properties>
     <mockrunner-jdbc.version>1.0.5</mockrunner-jdbc.version>
     <org.apache.derby.version>10.15.2.0</org.apache.derby.version>
@@ -1934,13 +1934,13 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-api</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.0-C309</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.0-237</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -1952,13 +1952,13 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.0-237</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.0-237</version>
       <classifier>tests</classifier>
       <scope>test</scope>
       <exclusions>
@@ -1971,7 +1971,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.0-237</version>
       <classifier>tests</classifier>
       <scope>test</scope>
       <exclusions>
@@ -2617,7 +2617,7 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.0-237</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>

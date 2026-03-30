@@ -8,7 +8,7 @@
     <version>11.0.0.0-237</version>
   </parent>
   <artifactId>pentaho-platform-core</artifactId>
-  <version>11.0.0.0-237</version>
+  <version>11.0.0.0-C309</version>
   <properties>
     <maven-surefire-plugin.reuseForks>false</maven-surefire-plugin.reuseForks>
     <powermock.version>1.6.3</powermock.version>
@@ -500,7 +500,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-api</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.0-C309</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -558,7 +558,7 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-engine</artifactId>
-      <version>${pdi.version}</version>
+      <version>11.0.0.0-C309</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
