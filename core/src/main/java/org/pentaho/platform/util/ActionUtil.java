@@ -91,14 +91,17 @@ public class ActionUtil {
 
   private static final String SCHEDULER_FAILURE_EMAIL_ENABLED_PROPERTY = "scheduler.failure.email.enabled";
   private static final boolean SCHEDULER_FAILURE_EMAIL_ENABLED_DEFAULT = false;
+  private static final String ADMIN_TO = "ADMIN_TO";
+  private static final String ADMIN_CC = "ADMIN_CC";
+  private static final String ADMIN_BCC = "ADMIN_BCC";
 
   static final String SCHEDULER_FAILURE_EMAIL_PROPERTIES = "system/scheduler_failure_email.properties";
 
   /**
-   * Admin failure email properties loaded once at class initialization from
+   * Admin failure email properties loaded lazily on first access from
    * {@value #SCHEDULER_FAILURE_EMAIL_PROPERTIES}. Changes to the file require a server restart to take effect.
    */
-  static final Properties ADMIN_FAILURE_EMAIL_PROPERTIES = loadAdminFailureEmailProperties();
+  private static Properties adminFailureEmailProperties;
 
   public static final String WORK_ITEM_UID = "workItemUid"; //$NON-NLS-1$
   public static final String WORK_ITEM_NAME = "workItemName"; //$NON-NLS-1$
@@ -475,25 +478,25 @@ public class ActionUtil {
       if ( emailGroupResolver == null ) {
         emailGroupResolver = new DefaultEmailGroupResolver();
       }
-      String resolveToList = emailGroupResolver.resolve(to);
-      if (resolveToList != null && resolveToList.length() > 0) {
+      String resolveToList = emailGroupResolver.resolve( to );
+      if ( resolveToList != null && resolveToList.length() > 0 ) {
         emailer.setTo( resolveToList );
-        String resolveCCList = emailGroupResolver.resolve(cc);
-        if (resolveCCList != null && resolveCCList.length() > 0) {
+        String resolveCCList = emailGroupResolver.resolve( cc );
+        if ( resolveCCList != null && resolveCCList.length() > 0 ) {
           emailer.setCc( resolveCCList );
         }
         String resolveBCCList = emailGroupResolver.resolve( bcc );
-        if (resolveBCCList != null && resolveBCCList.length() > 0) {
+        if ( resolveBCCList != null && resolveBCCList.length() > 0 ) {
           emailer.setBcc( resolveBCCList );
         }
-        String subject = ( String ) actionParams.get( SCH_EMAIL_SUBJECT );
-        if (subject != null && !"".equals( subject ) ) {
+        String subject = (String) actionParams.get( SCH_EMAIL_SUBJECT );
+        if ( subject != null && !"".equals( subject ) ) {
           emailer.setSubject( subject );
         } else {
           emailer.setSubject( "Pentaho Scheduler" + ( emailer.getAttachmentName() != null ? " : " + emailer.getAttachmentName() : "" ) );
         }
         String message = (String) actionParams.get( SCH_EMAIL_MESSAGE );
-        if ( subject != null && !"".equals( subject ) ) {
+        if ( message != null && !"".equals( message ) ) {
           emailer.setBody( message );
         }
         emailer.send();
@@ -535,9 +538,10 @@ public class ActionUtil {
       final String bcc = (String) actionParams.get( SCH_EMAIL_BCC );
 
       // Admin recipients loaded once at startup from system/scheduler_failure_email.properties
-      final String adminTo = ADMIN_FAILURE_EMAIL_PROPERTIES.getProperty( "ADMIN_TO", "" );
-      final String adminCc = ADMIN_FAILURE_EMAIL_PROPERTIES.getProperty( "ADMIN_CC", "" );
-      final String adminBcc = ADMIN_FAILURE_EMAIL_PROPERTIES.getProperty( "ADMIN_BCC", "" );
+      final Properties emailProperties = getAdminFailureEmailProperties();
+      final String adminTo = emailProperties.getProperty( ADMIN_TO, "" );
+      final String adminCc = emailProperties.getProperty( ADMIN_CC, "" );
+      final String adminBcc = emailProperties.getProperty( ADMIN_BCC, "" );
 
       final String resolvedTo = mergeAddresses( emailGroupResolver.resolve( to ), adminTo );
       final String resolvedCc = mergeAddresses( emailGroupResolver.resolve( cc ), adminCc );
@@ -575,17 +579,24 @@ public class ActionUtil {
     }
   }
 
-  static Properties loadAdminFailureEmailProperties() {
-    final Properties props = new Properties();
+  private static synchronized Properties getAdminFailureEmailProperties() {
+    if ( adminFailureEmailProperties == null ) {
+      loadAdminFailureEmailProperties();
+    }
+    return adminFailureEmailProperties;
+  }
+
+  private static void loadAdminFailureEmailProperties() {
+    final Properties properties = new Properties();
     try {
       final String solutionPath = PentahoSystem.getApplicationContext().getSolutionPath( SCHEDULER_FAILURE_EMAIL_PROPERTIES );
       if ( !StringUtils.isBlank( solutionPath ) ) {
         final File file = new File( solutionPath );
         if ( file.isFile() ) {
           try ( InputStream in = new FileInputStream( file ) ) {
-            props.load( in );
-            for ( String key : new String[] { "ADMIN_TO", "ADMIN_CC", "ADMIN_BCC" } ) {
-              props.setProperty( key, filterValidAddresses( props.getProperty( key, "" ) ) );
+            properties.load( in );
+            for ( String key : new String[] { ADMIN_TO, ADMIN_CC, ADMIN_BCC } ) {
+              properties.setProperty( key, filterValidAddresses( properties.getProperty( key, "" ) ) );
             }
           }
         }
@@ -593,7 +604,7 @@ public class ActionUtil {
     } catch ( IOException | RuntimeException e ) {
       logger.warn( "Could not load scheduler failure email admin properties.", e );
     }
-    return props;
+    adminFailureEmailProperties = properties;
   }
 
   private static String filterValidAddresses( final String addresses ) {
