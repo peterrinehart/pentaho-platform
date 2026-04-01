@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -384,7 +385,7 @@ public class ActionUtilTest {
   }
 
   @Test
-  public void testLoadAdminFailureEmailProperties_MissingFileReturnsEmptyProps() {
+  public void testLoadAdminFailureEmailProperties_MissingFileReturnsEmptyProps() throws Exception {
     IApplicationContext appContext = mock( IApplicationContext.class );
     when( appContext.getSolutionPath( ActionUtil.SCHEDULER_FAILURE_EMAIL_PROPERTIES ) )
       .thenReturn( "C:/does/not/exist/scheduler_failure_email.properties" );
@@ -392,7 +393,13 @@ public class ActionUtilTest {
     try ( MockedStatic<PentahoSystem> pentahoSystem = mockStatic( PentahoSystem.class ) ) {
       pentahoSystem.when( PentahoSystem::getApplicationContext ).thenReturn( appContext );
 
-      Properties props = ActionUtil.loadAdminFailureEmailProperties();
+      Method method = ActionUtil.class.getDeclaredMethod( "loadAdminFailureEmailProperties" );
+      method.setAccessible( true );
+      method.invoke( null );
+
+      Field field = ActionUtil.class.getDeclaredField( "adminFailureEmailProperties" );
+      field.setAccessible( true );
+      Properties props = (Properties) field.get( null );
       assertTrue( props.isEmpty() );
     }
   }
@@ -409,7 +416,13 @@ public class ActionUtilTest {
     try ( MockedStatic<PentahoSystem> pentahoSystem = mockStatic( PentahoSystem.class ) ) {
       pentahoSystem.when( PentahoSystem::getApplicationContext ).thenReturn( appContext );
 
-      Properties props = ActionUtil.loadAdminFailureEmailProperties();
+      Method method = ActionUtil.class.getDeclaredMethod( "loadAdminFailureEmailProperties" );
+      method.setAccessible( true );
+      method.invoke( null );
+
+      Field field = ActionUtil.class.getDeclaredField( "adminFailureEmailProperties" );
+      field.setAccessible( true );
+      Properties props = (Properties) field.get( null );
       assertTrue( props.isEmpty() );
     } finally {
       Files.deleteIfExists( temp );
