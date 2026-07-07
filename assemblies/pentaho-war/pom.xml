@@ -8,7 +8,7 @@
     <version>11.0.0.2-293</version>
   </parent>
   <artifactId>pentaho-war</artifactId>
-  <version>11.0.0.2-293</version>
+  <version>11.0.0.2-293-CUST-316</version>
   <packaging>war</packaging>
   <properties>
     <rdbms>hsqldb</rdbms>
